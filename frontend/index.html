@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Model Generator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo">
+                <div class="logo-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                        <path d="M2 17l10 5 10-5"/>
+                        <path d="M2 12l10 5 10-5"/>
+                    </svg>
+                </div>
+                <span class="logo-text">ModelAI</span>
+            </div>
+
+            <div class="sidebar-section">
+                <h3 class="sidebar-title" data-i18n="categories">Categories</h3>
+                <nav class="nav-menu">
+                    <button class="nav-item active" data-category="image">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="3" width="18" height="18" rx="2"/>
+                            <circle cx="8.5" cy="8.5" r="1.5"/>
+                            <path d="M21 15l-5-5L5 21"/>
+                        </svg>
+                        <span data-i18n="image">Image</span>
+                    </button>
+                    <button class="nav-item" data-category="video">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polygon points="23 7 16 12 23 17 23 7"/>
+                            <rect x="1" y="5" width="15" height="14" rx="2"/>
+                        </svg>
+                        <span data-i18n="video">Video</span>
+                    </button>
+                    <button class="nav-item" data-category="lipsync">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+                            <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                            <line x1="12" y1="19" x2="12" y2="23"/>
+                            <line x1="8" y1="23" x2="16" y2="23"/>
+                        </svg>
+                        <span data-i18n="lipsync">LipSync</span>
+                    </button>
+                    <button class="nav-item" data-category="settings">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="3"/>
+                            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                        </svg>
+                        <span data-i18n="settings">Settings</span>
+                    </button>
+                </nav>
+            </div>
+
+            <!-- Language & Theme Controls -->
+            <div class="sidebar-controls">
+                <div class="control-group">
+                    <label class="control-label" data-i18n="languageLabel">Language</label>
+                    <div class="lang-buttons">
+                        <button class="lang-btn" data-lang="en" title="English">
+                            <span class="flag">🇬🇧</span>
+                            <span>EN</span>
+                        </button>
+                        <button class="lang-btn active" data-lang="it" title="Italiano">
+                            <span class="flag">🇮🇹</span>
+                            <span>IT</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="control-group">
+                    <label class="control-label" data-i18n="theme">Theme</label>
+                    <button class="theme-toggle" id="theme-toggle">
+                        <span class="theme-icon dark">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                            </svg>
+                        </span>
+                        <span class="theme-icon light">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="5"/>
+                                <line x1="12" y1="1" x2="12" y2="3"/>
+                                <line x1="12" y1="21" x2="12" y2="23"/>
+                                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+                                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+                                <line x1="1" y1="12" x2="3" y2="12"/>
+                                <line x1="21" y1="12" x2="23" y2="12"/>
+                                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+                                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+                            </svg>
+                        </span>
+                        <span class="theme-text" data-i18n="darkMode">Dark Mode</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="sidebar-footer">
+                <div class="credits-badge">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+                        <line x1="12" y1="17" x2="12.01" y2="17"/>
+                    </svg>
+                    <span>500 <span data-i18n="credits">credits</span></span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Image Generation Panel -->
+            <section id="image-panel" class="panel active">
+                <div class="panel-header">
+                    <h1><span data-i18n="nanoBanana">Nano Banana</span> <span class="highlight" data-i18n="pro">Pro</span></h1>
+                    <p class="subtitle" data-i18n="aiFaceGeneration">AI Face Generation</p>
+                </div>
+
+                <form id="face-form" class="generation-form">
+                    <div class="form-group">
+                        <label data-i18n="selectMode">Select Mode</label>
+                        <div class="select-wrapper">
+                            <select name="mode" id="face-mode">
+                                <option value="nano-banana">Nano-Banana</option>
+                                <option value="realistic">Ultra Realistic</option>
+                                <option value="artistic">Artistic</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label><span data-i18n="referenceImages">Reference Images</span> <span class="optional">(<span data-i18n="optional">optional</span>)</span></label>
+                        <div class="image-upload-grid">
+                            <div class="image-upload-slot" data-slot="1">
+                                <input type="file" accept="image/*" id="ref-image-1" hidden>
+                                <div class="upload-placeholder">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                        <polyline points="17 8 12 3 7 8"/>
+                                        <line x1="12" y1="3" x2="12" y2="15"/>
+                                    </svg>
+                                    <span data-i18n="uploadImage">Upload</span>
+                                    <span class="formats" data-i18n="uploadFormats">png, jpg, webp</span>
+                                </div>
+                                <img class="preview-image" hidden>
+                                <button type="button" class="remove-image" hidden>&times;</button>
+                            </div>
+                            <div class="image-upload-slot" data-slot="2">
+                                <input type="file" accept="image/*" id="ref-image-2" hidden>
+                                <div class="upload-placeholder">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                        <polyline points="17 8 12 3 7 8"/>
+                                        <line x1="12" y1="3" x2="12" y2="15"/>
+                                    </svg>
+                                    <span data-i18n="uploadImage">Upload</span>
+                                    <span class="formats" data-i18n="uploadFormats">png, jpg, webp</span>
+                                </div>
+                                <img class="preview-image" hidden>
+                                <button type="button" class="remove-image" hidden>&times;</button>
+                            </div>
+                            <div class="image-upload-slot" data-slot="3">
+                                <input type="file" accept="image/*" id="ref-image-3" hidden>
+                                <div class="upload-placeholder">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                        <polyline points="17 8 12 3 7 8"/>
+                                        <line x1="12" y1="3" x2="12" y2="15"/>
+                                    </svg>
+                                    <span data-i18n="uploadImage">Upload</span>
+                                    <span class="formats" data-i18n="uploadFormats">png, jpg, webp</span>
+                                </div>
+                                <img class="preview-image" hidden>
+                                <button type="button" class="remove-image" hidden>&times;</button>
+                            </div>
+                            <div class="image-upload-slot" data-slot="4">
+                                <input type="file" accept="image/*" id="ref-image-4" hidden>
+                                <div class="upload-placeholder">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                        <polyline points="17 8 12 3 7 8"/>
+                                        <line x1="12" y1="3" x2="12" y2="15"/>
+                                    </svg>
+                                    <span data-i18n="uploadImage">Upload</span>
+                                    <span class="formats" data-i18n="uploadFormats">png, jpg, webp</span>
+                                </div>
+                                <img class="preview-image" hidden>
+                                <button type="button" class="remove-image" hidden>&times;</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="face-prompt" data-i18n="prompt">Prompt</label>
+                        <textarea 
+                            id="face-prompt" 
+                            name="prompt" 
+                            data-i18n-placeholder="promptPlaceholder"
+                            placeholder="Describe the face you want to generate..."
+                            rows="4"
+                        ></textarea>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group half">
+                            <label data-i18n="aspectRatio">Aspect Ratio</label>
+                            <div class="select-wrapper">
+                                <select name="aspect_ratio" id="face-aspect">
+                                    <option value="auto" data-i18n="auto">Auto</option>
+                                    <option value="1:1" data-i18n="square">Square (1:1)</option>
+                                    <option value="9:16" data-i18n="portrait">Portrait (9:16)</option>
+                                    <option value="16:9" data-i18n="landscape">Landscape (16:9)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group half">
+                            <label data-i18n="strength">Strength</label>
+                            <div class="slider-container">
+                                <input type="range" id="face-strength" name="strength" min="0" max="100" value="70">
+                                <span class="slider-value">0.7</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="toggle-group">
+                            <label class="toggle">
+                                <input type="checkbox" id="face-unlimited" disabled>
+                                <span class="toggle-slider"></span>
+                                <span class="toggle-label" data-i18n="unlimitedMode">Unlimited Mode</span>
+                            </label>
+                            <span class="toggle-note" data-i18n="unlimitedNote">Only available for Standard members and above</span>
+                        </div>
+                    </div>
+
+                    <div class="cost-indicator">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <line x1="12" y1="8" x2="12" y2="12"/>
+                            <line x1="12" y1="16" x2="12.01" y2="16"/>
+                        </svg>
+                        <span><span data-i18n="cost">Cost</span>: <strong>50 <span data-i18n="credits">credits</span></strong></span>
+                    </div>
+
+                    <button type="submit" class="generate-btn">
+                        <span class="btn-text" data-i18n="generate">Generate</span>
+                        <span class="btn-loader" hidden>
+                            <svg class="spinner" viewBox="0 0 24 24">
+                                <circle cx="12" cy="12" r="10" stroke-dasharray="31.4" stroke-dashoffset="10"/>
+                            </svg>
+                        </span>
+                    </button>
+                </form>
+            </section>
+
+            <!-- Video Generation Panel -->
+            <section id="video-panel" class="panel">
+                <div class="panel-header">
+                    <h1><span data-i18n="kling">Kling 2.6</span> <span class="highlight" data-i18n="motion">Motion</span></h1>
+                    <p class="subtitle" data-i18n="aiVideoGeneration">AI Video Generation</p>
+                </div>
+
+                <form id="video-form" class="generation-form">
+                    <div class="form-group">
+                        <label><span data-i18n="sourceImage">Source Image</span> <span class="required">*</span></label>
+                        <div class="single-upload">
+                            <input type="file" accept="image/*" id="video-source" hidden required>
+                            <div class="upload-area" id="video-upload-area">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="3" y="3" width="18" height="18" rx="2"/>
+                                    <circle cx="8.5" cy="8.5" r="1.5"/>
+                                    <path d="M21 15l-5-5L5 21"/>
+                                </svg>
+                                <span class="upload-text" data-i18n="dropImageHere">Drop face image here or click to upload</span>
+                                <span class="upload-formats" data-i18n="uploadFormats">png, jpg, webp (max 10MB)</span>
+                            </div>
+                            <div class="upload-preview" hidden>
+                                <img id="video-source-preview">
+                                <button type="button" class="remove-upload">&times;</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label data-i18n="motionType">Motion Type</label>
+                        <div class="motion-options">
+                            <label class="motion-option">
+                                <input type="radio" name="motion_type" value="natural" checked>
+                                <div class="option-card">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+                                    </svg>
+                                    <span data-i18n="natural">Natural</span>
+                                </div>
+                            </label>
+                            <label class="motion-option">
+                                <input type="radio" name="motion_type" value="dynamic">
+                                <div class="option-card">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+                                    </svg>
+                                    <span data-i18n="dynamic">Dynamic</span>
+                                </div>
+                            </label>
+                            <label class="motion-option">
+                                <input type="radio" name="motion_type" value="subtle">
+                                <div class="option-card">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="12" cy="12" r="10"/>
+                                        <path d="M8 14s1.5 2 4 2 4-2 4-2"/>
+                                        <line x1="9" y1="9" x2="9.01" y2="9"/>
+                                        <line x1="15" y1="9" x2="15.01" y2="9"/>
+                                    </svg>
+                                    <span data-i18n="subtle">Subtle</span>
+                                </div>
+                            </label>
+                            <label class="motion-option">
+                                <input type="radio" name="motion_type" value="talking">
+                                <div class="option-card">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                                    </svg>
+                                    <span data-i18n="talking">Talking</span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="motion-prompt"><span data-i18n="motionDescription">Motion Description</span> <span class="optional">(<span data-i18n="optional">optional</span>)</span></label>
+                        <textarea 
+                            id="motion-prompt" 
+                            name="motion_prompt" 
+                            data-i18n-placeholder="motionPlaceholder"
+                            placeholder="Describe the motion..."
+                            rows="3"
+                        ></textarea>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group half">
+                            <label data-i18n="duration">Duration</label>
+                            <div class="select-wrapper">
+                                <select name="duration_seconds" id="video-duration">
+                                    <option value="3">3 <span data-i18n="seconds">seconds</span></option>
+                                    <option value="5" selected>5 <span data-i18n="seconds">seconds</span></option>
+                                    <option value="7">7 <span data-i18n="seconds">seconds</span></option>
+                                    <option value="10">10 <span data-i18n="seconds">seconds</span></option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group half">
+                            <label data-i18n="aspectRatio">Aspect Ratio</label>
+                            <div class="select-wrapper">
+                                <select name="aspect_ratio" id="video-aspect">
+                                    <option value="9:16" selected data-i18n="portrait">Portrait (9:16)</option>
+                                    <option value="1:1" data-i18n="square">Square (1:1)</option>
+                                    <option value="16:9" data-i18n="landscape">Landscape (16:9)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="cost-indicator">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <line x1="12" y1="8" x2="12" y2="12"/>
+                            <line x1="12" y1="16" x2="12.01" y2="16"/>
+                        </svg>
+                        <span><span data-i18n="cost">Cost</span>: <strong>100 <span data-i18n="credits">credits</span></strong></span>
+                    </div>
+
+                    <button type="submit" class="generate-btn">
+                        <span class="btn-text" data-i18n="generateVideo">Generate Video</span>
+                        <span class="btn-loader" hidden>
+                            <svg class="spinner" viewBox="0 0 24 24">
+                                <circle cx="12" cy="12" r="10" stroke-dasharray="31.4" stroke-dashoffset="10"/>
+                            </svg>
+                        </span>
+                    </button>
+                </form>
+            </section>
+
+            <!-- LipSync Panel -->
+            <section id="lipsync-panel" class="panel">
+                <div class="panel-header">
+                    <h1><span data-i18n="voice">Voice</span> <span class="highlight" data-i18n="sync">Sync</span></h1>
+                    <p class="subtitle" data-i18n="aiLipSyncGenerator">AI Lip Sync Generator</p>
+                </div>
+
+                <form id="lipsync-form" class="generation-form">
+                    <div class="form-group">
+                        <label><span data-i18n="sourceVideo">Source Video</span> <span class="required">*</span></label>
+                        <div class="single-upload">
+                            <input type="file" accept="video/*" id="lipsync-video" hidden required>
+                            <div class="upload-area" id="lipsync-upload-area">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polygon points="23 7 16 12 23 17 23 7"/>
+                                    <rect x="1" y="5" width="15" height="14" rx="2"/>
+                                </svg>
+                                <span class="upload-text" data-i18n="dropVideoHere">Drop video here or click to upload</span>
+                                <span class="upload-formats" data-i18n="videoFormats">mp4, webm, mov (max 50MB)</span>
+                            </div>
+                            <div class="upload-preview video-preview" hidden>
+                                <video id="lipsync-video-preview" controls></video>
+                                <button type="button" class="remove-upload">&times;</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="lipsync-text"><span data-i18n="speechText">Speech Text</span> <span class="required">*</span></label>
+                        <textarea 
+                            id="lipsync-text" 
+                            name="text" 
+                            data-i18n-placeholder="speechPlaceholder"
+                            placeholder="Enter the text you want the model to speak..."
+                            rows="4"
+                            required
+                        ></textarea>
+                        <span class="char-count"><span id="char-count">0</span> / 5000</span>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group half">
+                            <label data-i18n="voiceType">Voice Type</label>
+                            <div class="select-wrapper">
+                                <select name="voice_type" id="voice-type">
+                                    <option value="female_young" data-i18n="youngFemale">Young Female</option>
+                                    <option value="female_mature" data-i18n="matureFemale">Mature Female</option>
+                                    <option value="female_soft" data-i18n="softFemale">Soft Female</option>
+                                    <option value="male_young" data-i18n="youngMale">Young Male</option>
+                                    <option value="male_deep" data-i18n="deepMale">Deep Male</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group half">
+                            <label data-i18n="language">Language</label>
+                            <div class="select-wrapper">
+                                <select name="language" id="voice-language">
+                                    <option value="en">English</option>
+                                    <option value="it">Italiano</option>
+                                    <option value="es">Español</option>
+                                    <option value="fr">Français</option>
+                                    <option value="de">Deutsch</option>
+                                    <option value="pt">Português</option>
+                                    <option value="ja">日本語</option>
+                                    <option value="ko">한국어</option>
+                                    <option value="zh">中文</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="cost-indicator">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <line x1="12" y1="8" x2="12" y2="12"/>
+                            <line x1="12" y1="16" x2="12.01" y2="16"/>
+                        </svg>
+                        <span><span data-i18n="cost">Cost</span>: <strong>75 <span data-i18n="credits">credits</span></strong></span>
+                    </div>
+
+                    <button type="submit" class="generate-btn">
+                        <span class="btn-text" data-i18n="applyLipSync">Apply Lip Sync</span>
+                        <span class="btn-loader" hidden>
+                            <svg class="spinner" viewBox="0 0 24 24">
+                                <circle cx="12" cy="12" r="10" stroke-dasharray="31.4" stroke-dashoffset="10"/>
+                            </svg>
+                        </span>
+                    </button>
+                </form>
+            </section>
+
+            <!-- Settings Panel -->
+            <section id="settings-panel" class="panel">
+                <div class="panel-header">
+                    <h1><span data-i18n="apiSettings">API Settings</span></h1>
+                    <p class="subtitle" data-i18n="apiSettingsDesc">Configure your API keys to enable AI generation features</p>
+                </div>
+
+                <form id="settings-form" class="settings-form">
+                    <!-- Face Generation API -->
+                    <div class="settings-section">
+                        <h3 class="section-title">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                                <circle cx="8.5" cy="8.5" r="1.5"/>
+                                <path d="M21 15l-5-5L5 21"/>
+                            </svg>
+                            <span data-i18n="faceGeneration">Face Generation</span>
+                        </h3>
+                        
+                        <div class="form-group">
+                            <label for="nano-banana-key" data-i18n="nanoBananaKey">Nano Banana Pro API Key</label>
+                            <div class="input-with-help">
+                                <input type="password" id="nano-banana-key" placeholder="nb_xxxxxxxxxxxxxxxx" autocomplete="off">
+                                <button type="button" class="toggle-visibility" title="Show/Hide">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                        <circle cx="12" cy="12" r="3"/>
+                                    </svg>
+                                </button>
+                            </div>
+                            <details class="api-help">
+                                <summary data-i18n="howToGetKeys">How to get API keys</summary>
+                                <p data-i18n="nanoBananaInstructions">1. Go to nanobanana.com
+2. Create an account
+3. Navigate to API section
+4. Generate your API key</p>
+                            </details>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="nano-banana-url" data-i18n="nanoBananaUrl">Nano Banana Base URL</label>
+                            <input type="url" id="nano-banana-url" value="https://api.nanobanana.com/v1" placeholder="https://api.nanobanana.com/v1">
+                        </div>
+                    </div>
+
+                    <!-- Video Generation API -->
+                    <div class="settings-section">
+                        <h3 class="section-title">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polygon points="23 7 16 12 23 17 23 7"/>
+                                <rect x="1" y="5" width="15" height="14" rx="2"/>
+                            </svg>
+                            <span data-i18n="videoGeneration">Video Generation</span>
+                        </h3>
+                        
+                        <div class="form-group">
+                            <label for="kling-key" data-i18n="klingKey">Kling API Key</label>
+                            <div class="input-with-help">
+                                <input type="password" id="kling-key" placeholder="kling_xxxxxxxxxxxxxxxx" autocomplete="off">
+                                <button type="button" class="toggle-visibility" title="Show/Hide">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                        <circle cx="12" cy="12" r="3"/>
+                                    </svg>
+                                </button>
+                            </div>
+                            <details class="api-help">
+                                <summary data-i18n="howToGetKeys">How to get API keys</summary>
+                                <p data-i18n="klingInstructions">1. Visit kling.ai
+2. Sign up for an account
+3. Go to Developer settings
+4. Create a new API key</p>
+                            </details>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="kling-url" data-i18n="klingUrl">Kling Base URL</label>
+                            <input type="url" id="kling-url" value="https://api.kling.ai/v1" placeholder="https://api.kling.ai/v1">
+                        </div>
+                    </div>
+
+                    <!-- Lip Sync API -->
+                    <div class="settings-section">
+                        <h3 class="section-title">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+                                <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                                <line x1="12" y1="19" x2="12" y2="23"/>
+                                <line x1="8" y1="23" x2="16" y2="23"/>
+                            </svg>
+                            <span data-i18n="lipSyncVoice">Lip Sync & Voice</span>
+                        </h3>
+
+                        <div class="form-group">
+                            <label data-i18n="provider">Provider</label>
+                            <div class="provider-tabs">
+                                <button type="button" class="provider-tab active" data-provider="elevenlabs">ElevenLabs</button>
+                                <button type="button" class="provider-tab" data-provider="synclabs">Sync Labs</button>
+                                <button type="button" class="provider-tab" data-provider="did">D-ID</button>
+                            </div>
+                        </div>
+                        
+                        <!-- ElevenLabs -->
+                        <div class="provider-config active" id="config-elevenlabs">
+                            <div class="form-group">
+                                <label for="elevenlabs-key" data-i18n="elevenLabsKey">ElevenLabs API Key</label>
+                                <div class="input-with-help">
+                                    <input type="password" id="elevenlabs-key" placeholder="xi_xxxxxxxxxxxxxxxx" autocomplete="off">
+                                    <button type="button" class="toggle-visibility" title="Show/Hide">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                            <circle cx="12" cy="12" r="3"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                                <details class="api-help">
+                                    <summary data-i18n="howToGetKeys">How to get API keys</summary>
+                                    <p data-i18n="elevenLabsInstructions">1. Go to elevenlabs.io
+2. Create an account
+3. Click on your profile
+4. Copy your API key</p>
+                                </details>
+                            </div>
+                        </div>
+
+                        <!-- Sync Labs -->
+                        <div class="provider-config" id="config-synclabs">
+                            <div class="form-group">
+                                <label for="synclabs-key" data-i18n="syncLabsKey">Sync Labs API Key</label>
+                                <div class="input-with-help">
+                                    <input type="password" id="synclabs-key" placeholder="sync_xxxxxxxxxxxxxxxx" autocomplete="off">
+                                    <button type="button" class="toggle-visibility" title="Show/Hide">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                            <circle cx="12" cy="12" r="3"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                                <details class="api-help">
+                                    <summary data-i18n="howToGetKeys">How to get API keys</summary>
+                                    <p data-i18n="syncLabsInstructions">1. Visit synclabs.so
+2. Register for an account
+3. Access API dashboard
+4. Generate API credentials</p>
+                                </details>
+                            </div>
+                        </div>
+
+                        <!-- D-ID -->
+                        <div class="provider-config" id="config-did">
+                            <div class="form-group">
+                                <label for="did-key" data-i18n="didKey">D-ID API Key</label>
+                                <div class="input-with-help">
+                                    <input type="password" id="did-key" placeholder="did_xxxxxxxxxxxxxxxx" autocomplete="off">
+                                    <button type="button" class="toggle-visibility" title="Show/Hide">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                            <circle cx="12" cy="12" r="3"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                                <details class="api-help">
+                                    <summary data-i18n="howToGetKeys">How to get API keys</summary>
+                                    <p data-i18n="didInstructions">1. Go to d-id.com
+2. Create an account
+3. Navigate to API section
+4. Get your API key</p>
+                                </details>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="generate-btn save-btn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+                            <polyline points="17 21 17 13 7 13 7 21"/>
+                            <polyline points="7 3 7 8 15 8"/>
+                        </svg>
+                        <span data-i18n="saveSettings">Save Settings</span>
+                    </button>
+                </form>
+            </section>
+        </main>
+
+        <!-- Results Panel -->
+        <aside class="results-panel">
+            <div class="results-header">
+                <h2 data-i18n="yourResults">Your Results</h2>
+                <a href="#" class="feedback-link" data-i18n="feedbackWelcome">Feedback is welcome</a>
+            </div>
+
+            <div class="results-content" id="results-content">
+                <!-- Demo content -->
+                <div class="demo-section">
+                    <h3 data-i18n="seeHowItWorks">See how it works</h3>
+                    <div class="demo-image">
+                        <div class="demo-placeholder">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                                <circle cx="8.5" cy="8.5" r="1.5"/>
+                                <path d="M21 15l-5-5L5 21"/>
+                            </svg>
+                            <span data-i18n="contentWillAppear">Your generated content will appear here</span>
+                        </div>
+                    </div>
+                    <p class="demo-text" data-i18n="demoText">
+                        This is a demo of what you can create with this tool. 
+                        Try it yourself by creating a new task!
+                    </p>
+                </div>
+
+                <!-- Job Status -->
+                <div class="job-status" id="job-status" hidden>
+                    <div class="status-header">
+                        <span class="status-badge pending" data-i18n="processing">Processing</span>
+                        <span class="status-time" id="status-time">0s</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+                    </div>
+                    <p class="status-message" id="status-message" data-i18n="initializing">Initializing...</p>
+                </div>
+
+                <!-- Result Display -->
+                <div class="result-display" id="result-display" hidden>
+                    <div class="result-media">
+                        <img id="result-image" hidden>
+                        <video id="result-video" controls hidden></video>
+                    </div>
+                    <div class="result-actions">
+                        <a id="download-link" class="action-btn download" download>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                <polyline points="7 10 12 15 17 10"/>
+                                <line x1="12" y1="15" x2="12" y2="3"/>
+                            </svg>
+                            <span data-i18n="download">Download</span>
+                        </a>
+                        <button class="action-btn continue" id="continue-btn">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="5" y1="12" x2="19" y2="12"/>
+                                <polyline points="12 5 19 12 12 19"/>
+                            </svg>
+                            <span data-i18n="continueToVideo">Continue to Video</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- History -->
+            <div class="history-section">
+                <h3 data-i18n="recentJobs">Recent Jobs</h3>
+                <div class="history-list" id="history-list">
+                    <p class="history-empty" data-i18n="noRecentJobs">No recent jobs yet</p>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <script src="translations.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
