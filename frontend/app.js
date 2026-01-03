@@ -459,6 +459,9 @@ function handleFileSelect(input, area, preview, previewContainer, stateKey, isIm
             reader.readAsDataURL(file);
         } else {
             preview.src = URL.createObjectURL(file);
+            if (preview.tagName === 'VIDEO') {
+                preview.load();
+            }
         }
         
         area.hidden = true;
