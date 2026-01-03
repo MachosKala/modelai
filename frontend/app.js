@@ -44,7 +44,7 @@ const state = {
     uploadedFiles: {
         face: [],
         video: null,
-        videoEnd: null,
+        videoMotion: null,
         lipsync: null
     },
     settings: {
@@ -400,7 +400,7 @@ function initImageUploads() {
     
     // Video source image
     initSingleUpload('video-source', 'video-upload-area', 'video-source-preview', 'video', true);
-    initSingleUpload('video-end', 'video-end-upload-area', 'video-end-preview', 'videoEnd', true);
+    initSingleUpload('video-motion', 'video-motion-upload-area', 'video-motion-preview', 'videoMotion', false);
     
     // Lipsync video
     initSingleUpload('lipsync-video', 'lipsync-upload-area', 'lipsync-video-preview', 'lipsync', false);
@@ -554,21 +554,28 @@ async function submitVideoGeneration() {
         showToast(t('startImage') + ' ' + t('required'), 'error');
         return;
     }
+    if (!state.uploadedFiles.videoMotion) {
+        showToast(t('drivingVideo') + ' ' + t('required'), 'error');
+        return;
+    }
     
     try {
         setButtonLoading(btn, true);
         
         const formData = new FormData();
         formData.append('image', state.uploadedFiles.video);
-        const mode = document.getElementById('video-mode')?.value || '';
-        if (mode) {
-            formData.append('mode', mode);
-        }
-        if (state.uploadedFiles.videoEnd) {
-            formData.append('end_image', state.uploadedFiles.videoEnd);
-        }
+        formData.append('video', state.uploadedFiles.videoMotion);
+
+        const mode = document.getElementById('video-mode')?.value || 'std';
+        formData.append('mode', mode);
+
+        const orientation = document.getElementById('video-orientation')?.value || 'video';
+        formData.append('character_orientation', orientation);
+
+        const keepSound = document.getElementById('video-keep-sound')?.checked ? 'true' : 'false';
+        formData.append('keep_original_sound', keepSound);
+
         formData.append('prompt', document.getElementById('video-prompt').value || '');
-        formData.append('aspect_ratio', document.getElementById('video-aspect').value);
         
         const response = await fetch(`${API_BASE}/video/generate`, {
             method: 'POST',

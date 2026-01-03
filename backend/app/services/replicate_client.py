@@ -33,6 +33,44 @@ class ReplicateClient:
             "Content-Type": "application/json",
         }
 
+    def _auth_headers(self) -> dict[str, str]:
+        # For multipart requests we MUST NOT set Content-Type manually.
+        if not self.api_token:
+            raise ReplicateHTTPError(
+                "Missing Replicate API token. Set REPLICATE_API_TOKEN in backend/.env "
+                "or save it from the Settings dashboard."
+            )
+        return {"Authorization": f"Token {self.api_token}"}
+
+    async def upload_file(
+        self,
+        *,
+        filename: str,
+        content: bytes,
+        content_type: str | None = None,
+    ) -> str:
+        """
+        Upload a file to Replicate and return a URL that can be used as a model input.
+
+        Endpoint: POST /v1/files (multipart/form-data)
+        """
+        files = {"file": (filename or "upload.bin", content, content_type or "application/octet-stream")}
+        async with httpx.AsyncClient(timeout=120.0) as client:
+            resp = await client.post(
+                f"{self.base_url}/files",
+                headers=self._auth_headers(),
+                files=files,
+            )
+        if resp.status_code >= 400:
+            raise ReplicateHTTPError(f"Replicate file upload failed: {resp.status_code} {resp.text}")
+
+        data = resp.json()
+        urls = data.get("urls") or {}
+        file_url = urls.get("get") or urls.get("download") or data.get("url")
+        if not file_url:
+            raise ReplicateHTTPError("Replicate file upload succeeded but no file URL was returned.")
+        return str(file_url)
+
     async def create_prediction(self, *, model: str, input: dict[str, Any]) -> dict[str, Any]:
         """
         Create a prediction.

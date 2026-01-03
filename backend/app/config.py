@@ -12,9 +12,8 @@ class Settings(BaseSettings):
     face_model: str = "google/nano-banana-pro:eefce837d77048ccc736cd660d4f178d223b2d99aeb5ef856741eb81941c9ed2"
     
     # Video Generation Model (on Replicate)  
-    # NOTE: Set this from the dashboard or Render env vars to a valid Replicate video model.
-    # Kling v2.6 Motion Control may not be available on Replicate for your account.
-    video_model: str = ""
+    # Default: Kling v2.6 Motion Control (image + driving video -> video)
+    video_model: str = "kwaivgi/kling-v2.6-motion-control:0539a841b08214a281bf6792ad847469700bc0d2935e6eba2cf3d0e8944815c0"
     
     # Lip Sync Provider
     lipsync_provider: Literal["elevenlabs", "sync_labs", "d-id"] = "elevenlabs"

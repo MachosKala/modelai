@@ -4,7 +4,8 @@ from ..models import (
     VideoGenerationRequest, 
     VideoGenerationResponse, 
     JobStatusResponse,
-    VideoAspectRatio,
+    VideoMode,
+    CharacterOrientation,
     JobStatus
 )
 from ..services.video_generator import video_generator
@@ -15,19 +16,22 @@ router = APIRouter(prefix="/video", tags=["Video Generation"])
 
 @router.post("/generate", response_model=VideoGenerationResponse)
 async def generate_video(
-    image: UploadFile = File(..., description="Start image"),
-    end_image: UploadFile | None = File(default=None, description="Optional end image"),
-    mode: str = Form("", description="Optional mode (model-specific)"),
+    image: UploadFile = File(..., description="Character image (face)"),
+    video: UploadFile = File(..., description="Driving/motion video"),
+    mode: VideoMode = Form(VideoMode.STD),
+    character_orientation: CharacterOrientation = Form(CharacterOrientation.VIDEO),
+    keep_original_sound: bool = Form(False),
     prompt: str = Form("", description="Optional prompt"),
-    aspect_ratio: VideoAspectRatio = Form(VideoAspectRatio.LANDSCAPE)
 ):
     """
-    Generate a video from an image using the configured Replicate video model.
+    Generate a video from an image + driving video using Kling v2.6 Motion Control.
     
     - **image**: Start image
-    - **end_image**: Optional end image
+    - **video**: Driving video (motion reference)
     - **prompt**: Prompt
-    - **aspect_ratio**: 16:9 or 9:16
+    - **mode**: std / pro
+    - **character_orientation**: image / video
+    - **keep_original_sound**: keep audio from the driving video
     """
     
     # Validate file
@@ -44,24 +48,34 @@ async def generate_video(
     if not image_data:
         raise HTTPException(status_code=400, detail="Empty image file")
 
-    end_image_data: bytes | None = None
-    if end_image and end_image.filename:
-        end_content_type = end_image.content_type or ""
-        if not end_content_type.startswith("image/"):
-            raise HTTPException(status_code=400, detail="End image must be an image")
-        end_image_data = await end_image.read()
-        if not end_image_data:
-            end_image_data = None
+    # Validate driving video
+    if not video.filename:
+        raise HTTPException(status_code=400, detail="Driving video file required")
+    video_content_type = video.content_type or ""
+    if not video_content_type.startswith("video/"):
+        raise HTTPException(status_code=400, detail="Driving file must be a video")
+    video_data = await video.read()
+    if not video_data:
+        raise HTTPException(status_code=400, detail="Empty video file")
     
     # Create request
     request = VideoGenerationRequest(
-        mode=mode.strip() or None,
         prompt=prompt or "",
-        aspect_ratio=aspect_ratio
+        mode=mode,
+        character_orientation=character_orientation,
+        keep_original_sound=keep_original_sound,
     )
     
     # Start generation
-    job = await video_generator.generate_video(request, image_data, end_image_data=end_image_data)
+    job = await video_generator.generate_video(
+        request,
+        image_data=image_data,
+        image_filename=image.filename or "image.png",
+        image_content_type=content_type,
+        motion_video_data=video_data,
+        motion_video_filename=video.filename or "motion.mp4",
+        motion_video_content_type=video_content_type,
+    )
     
     return VideoGenerationResponse(
         job_id=job.id,
@@ -111,7 +125,8 @@ async def get_video_history(limit: int = 20):
                 "message": j.message,
                 "created_at": j.created_at,
                 "result_url": j.result_url,
-                "aspect_ratio": j.metadata.get("aspect_ratio") if j.metadata else None
+                "model": j.metadata.get("model") if j.metadata else None,
+                "mode": j.metadata.get("mode") if j.metadata else None
             }
             for j in jobs[:limit]
         ]

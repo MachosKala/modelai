@@ -42,15 +42,21 @@ class FaceGenerationResponse(BaseModel):
 
 # ================== Video Generation ==================
 
-class VideoAspectRatio(str, Enum):
-    LANDSCAPE = "16:9"
-    PORTRAIT = "9:16"
+class VideoMode(str, Enum):
+    STD = "std"
+    PRO = "pro"
+
+
+class CharacterOrientation(str, Enum):
+    IMAGE = "image"
+    VIDEO = "video"
 
 
 class VideoGenerationRequest(BaseModel):
-    mode: Optional[str] = Field(default=None, description="Optional model mode (model-specific)")
     prompt: str = Field(default="", description="Prompt for the video generation")
-    aspect_ratio: VideoAspectRatio = VideoAspectRatio.LANDSCAPE
+    mode: VideoMode = VideoMode.STD
+    character_orientation: CharacterOrientation = CharacterOrientation.VIDEO
+    keep_original_sound: bool = False
 
 
 class VideoGenerationResponse(BaseModel):

@@ -1,6 +1,5 @@
 import asyncio
 import logging
-import base64
 import httpx
 from pathlib import Path
 
@@ -23,8 +22,13 @@ class ReplicateVideoService:
     async def generate_video(
         self,
         request: VideoGenerationRequest,
-        source_image: bytes,
-        end_image_data: bytes | None = None,
+        *,
+        image_data: bytes,
+        image_filename: str,
+        image_content_type: str,
+        motion_video_data: bytes,
+        motion_video_filename: str,
+        motion_video_content_type: str,
     ) -> Job:
         """Start video generation job using Replicate"""
         
@@ -33,17 +37,29 @@ class ReplicateVideoService:
             status=JobStatus.PENDING,
             message="Initializing video generation...",
             metadata={
-                "mode": request.mode,
+                "model": get_video_model() or settings.video_model,
+                "mode": request.mode.value,
+                "character_orientation": request.character_orientation.value,
+                "keep_original_sound": request.keep_original_sound,
                 "prompt": request.prompt,
-                "aspect_ratio": request.aspect_ratio.value,
-                "has_end_image": bool(end_image_data),
                 "provider": "replicate",
             }
         )
         await job_manager.create_job(job)
         
         # Start async processing
-        asyncio.create_task(self._process_video_generation(job.id, request, source_image, end_image_data))
+        asyncio.create_task(
+            self._process_video_generation(
+                job.id,
+                request,
+                image_data=image_data,
+                image_filename=image_filename,
+                image_content_type=image_content_type,
+                motion_video_data=motion_video_data,
+                motion_video_filename=motion_video_filename,
+                motion_video_content_type=motion_video_content_type,
+            )
+        )
         
         return job
     
@@ -51,8 +67,13 @@ class ReplicateVideoService:
         self,
         job_id: str,
         request: VideoGenerationRequest,
-        source_image: bytes,
-        end_image_data: bytes | None = None,
+        *,
+        image_data: bytes,
+        image_filename: str,
+        image_content_type: str,
+        motion_video_data: bytes,
+        motion_video_filename: str,
+        motion_video_content_type: str,
     ):
         """Process video generation in background using Replicate REST API."""
         try:
@@ -71,14 +92,18 @@ class ReplicateVideoService:
                     "or set it from the Settings dashboard."
                 )
 
-            # Convert images to data URIs
-            img_base64 = base64.b64encode(source_image).decode("utf-8")
-            image_uri = f"data:image/png;base64,{img_base64}"
+            await job_manager.update_job(job_id, progress=20, message="Uploading inputs to Replicate...")
 
-            end_image_uri = None
-            if end_image_data:
-                end_base64 = base64.b64encode(end_image_data).decode("utf-8")
-                end_image_uri = f"data:image/png;base64,{end_base64}"
+            image_uri = await client.upload_file(
+                filename=image_filename,
+                content=image_data,
+                content_type=image_content_type or "image/png",
+            )
+            video_uri = await client.upload_file(
+                filename=motion_video_filename,
+                content=motion_video_data,
+                content_type=motion_video_content_type or "video/mp4",
+            )
             
             await job_manager.update_job(
                 job_id,
@@ -90,13 +115,12 @@ class ReplicateVideoService:
 
             input_payload: dict = {
                 "image": image_uri,
+                "video": video_uri,
                 "prompt": request.prompt or "",
-                "aspect_ratio": request.aspect_ratio.value,
+                "mode": request.mode.value,
+                "character_orientation": request.character_orientation.value,
+                "keep_original_sound": request.keep_original_sound,
             }
-            if request.mode:
-                input_payload["mode"] = request.mode
-            if end_image_uri:
-                input_payload["end_image"] = end_image_uri
 
             prediction = await client.create_prediction(
                 model=model_id,

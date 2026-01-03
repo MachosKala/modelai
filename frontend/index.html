@@ -221,8 +221,8 @@
             <!-- Video Generation Panel -->
             <section id="video-panel" class="panel">
                 <div class="panel-header">
-                    <h1><span data-i18n="imageToVideo">Image to Video</span></h1>
-                    <p class="subtitle" data-i18n="imageToVideoDesc">Generate a video from a start image (+ optional end image)</p>
+                    <h1><span data-i18n="kling">Kling 2.6</span> <span class="highlight" data-i18n="motionControl">Motion Control</span></h1>
+                    <p class="subtitle" data-i18n="motionControlDesc">Mount the image onto the video and copy its movements</p>
                 </div>
 
                 <form id="video-form" class="generation-form">
@@ -230,8 +230,8 @@
                         <label data-i18n="selectMode">Select Mode</label>
                         <div class="select-wrapper">
                             <select name="mode" id="video-mode">
-                                <option value="" selected>Auto</option>
-                                <option value="Veo3.1 image to video fast">Veo3.1 image to video fast</option>
+                                <option value="std" selected>std</option>
+                                <option value="pro">pro</option>
                             </select>
                         </div>
                     </div>
@@ -247,7 +247,7 @@
                                     <path d="M21 15l-5-5L5 21"/>
                                 </svg>
                                 <span class="upload-text" data-i18n="dropStartImageHere">Drop start image here or click to upload</span>
-                                <span class="upload-formats" data-i18n="uploadFormats">png, jpg, webp</span>
+                                <span class="upload-formats" data-i18n="videoFormats">mp4, webm, mov (max 50MB)</span>
                             </div>
                             <div class="upload-preview" hidden>
                                 <img id="video-source-preview">
@@ -257,20 +257,20 @@
                     </div>
 
                     <div class="form-group">
-                        <label><span data-i18n="endImageOptional">End Image (optional)</span></label>
+                        <label><span data-i18n="drivingVideo">Driving Video</span> <span class="required">*</span></label>
                         <div class="single-upload">
-                            <input type="file" accept="image/*" id="video-end" hidden>
-                            <div class="upload-area" id="video-end-upload-area">
+                            <input type="file" accept="video/*" id="video-motion" hidden required>
+                            <div class="upload-area" id="video-motion-upload-area">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                     <rect x="3" y="3" width="18" height="18" rx="2"/>
                                     <circle cx="8.5" cy="8.5" r="1.5"/>
                                     <path d="M21 15l-5-5L5 21"/>
                                 </svg>
-                                <span class="upload-text" data-i18n="dropEndImageHere">Drop end image here or click to upload</span>
+                                <span class="upload-text" data-i18n="dropDrivingVideoHere">Drop driving video here or click to upload</span>
                                 <span class="upload-formats" data-i18n="uploadFormats">png, jpg, webp</span>
                             </div>
                             <div class="upload-preview" hidden>
-                                <img id="video-end-preview">
+                                <video id="video-motion-preview" controls></video>
                                 <button type="button" class="remove-upload">&times;</button>
                             </div>
                         </div>
@@ -288,11 +288,19 @@
                     </div>
 
                     <div class="form-group">
-                        <label data-i18n="aspectRatio">Aspect Ratio</label>
+                        <label data-i18n="keepOriginalSound">Keep original sound</label>
+                        <label class="checkbox-row">
+                            <input type="checkbox" id="video-keep-sound">
+                            <span data-i18n="keepOriginalSoundDesc">Keep the audio from the driving video</span>
+                        </label>
+                    </div>
+
+                    <div class="form-group">
+                        <label data-i18n="characterOrientation">Character orientation</label>
                         <div class="select-wrapper">
-                            <select name="aspect_ratio" id="video-aspect">
-                                <option value="16:9" selected>16:9</option>
-                                <option value="9:16">9:16</option>
+                            <select name="character_orientation" id="video-orientation">
+                                <option value="video" selected data-i18n="orientationVideo">video</option>
+                                <option value="image" data-i18n="orientationImage">image</option>
                             </select>
                         </div>
                     </div>
