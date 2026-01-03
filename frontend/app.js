@@ -44,6 +44,7 @@ const state = {
     uploadedFiles: {
         face: [],
         video: null,
+        videoEnd: null,
         lipsync: null
     },
     settings: {
@@ -399,6 +400,7 @@ function initImageUploads() {
     
     // Video source image
     initSingleUpload('video-source', 'video-upload-area', 'video-source-preview', 'video', true);
+    initSingleUpload('video-end', 'video-end-upload-area', 'video-end-preview', 'videoEnd', true);
     
     // Lipsync video
     initSingleUpload('lipsync-video', 'lipsync-upload-area', 'lipsync-video-preview', 'lipsync', false);
@@ -549,7 +551,7 @@ async function submitVideoGeneration() {
     const btn = form.querySelector('.generate-btn');
     
     if (!state.uploadedFiles.video) {
-        showToast(t('sourceImage') + ' ' + t('required'), 'error');
+        showToast(t('startImage') + ' ' + t('required'), 'error');
         return;
     }
     
@@ -558,14 +560,11 @@ async function submitVideoGeneration() {
         
         const formData = new FormData();
         formData.append('image', state.uploadedFiles.video);
-        formData.append('motion_type', form.querySelector('input[name="motion_type"]:checked').value);
-        formData.append('duration_seconds', document.getElementById('video-duration').value);
-        formData.append('aspect_ratio', document.getElementById('video-aspect').value);
-        
-        const motionPrompt = document.getElementById('motion-prompt').value;
-        if (motionPrompt) {
-            formData.append('motion_prompt', motionPrompt);
+        if (state.uploadedFiles.videoEnd) {
+            formData.append('end_image', state.uploadedFiles.videoEnd);
         }
+        formData.append('prompt', document.getElementById('video-prompt').value || '');
+        formData.append('aspect_ratio', document.getElementById('video-aspect').value);
         
         const response = await fetch(`${API_BASE}/video/generate`, {
             method: 'POST',

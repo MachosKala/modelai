@@ -20,6 +20,8 @@ const translations = {
         kling: "Kling 2.6",
         motion: "Motion",
         aiVideoGeneration: "AI Video Generation",
+        imageToVideo: "Image to Video",
+        imageToVideoDesc: "Generate a video from a start image (+ optional end image)",
         voice: "Voice",
         sync: "Sync",
         aiLipSyncGenerator: "AI Lip Sync Generator",
@@ -47,6 +49,9 @@ const translations = {
         
         // Video
         sourceImage: "Source Image",
+        startImage: "Start Image",
+        endImageOptional: "End Image (optional)",
+        videoPromptPlaceholder: "Describe the video... e.g., 'Smooth movement, subtle expressions, soft lighting'",
         motionType: "Motion Type",
         natural: "Natural",
         dynamic: "Dynamic",
@@ -75,6 +80,8 @@ const translations = {
         uploadImage: "Upload image",
         uploadFormats: "png, jpg, webp",
         dropImageHere: "Drop face image here or click to upload",
+        dropStartImageHere: "Drop start image here or click to upload",
+        dropEndImageHere: "Drop end image here or click to upload",
         dropVideoHere: "Drop video here or click to upload",
         videoFormats: "mp4, webm, mov (max 50MB)",
         
@@ -160,6 +167,8 @@ const translations = {
         kling: "Kling 2.6",
         motion: "Motion",
         aiVideoGeneration: "Generazione Video AI",
+        imageToVideo: "Immagine → Video",
+        imageToVideoDesc: "Genera un video da un'immagine iniziale (+ immagine finale opzionale)",
         voice: "Voice",
         sync: "Sync",
         aiLipSyncGenerator: "Generatore Lip Sync AI",
@@ -187,6 +196,9 @@ const translations = {
         
         // Video
         sourceImage: "Immagine Sorgente",
+        startImage: "Immagine Iniziale",
+        endImageOptional: "Immagine Finale (opzionale)",
+        videoPromptPlaceholder: "Descrivi il video... es., 'Movimento fluido, espressioni leggere, luce morbida'",
         motionType: "Tipo di Movimento",
         natural: "Naturale",
         dynamic: "Dinamico",
@@ -215,6 +227,8 @@ const translations = {
         uploadImage: "Carica immagine",
         uploadFormats: "png, jpg, webp",
         dropImageHere: "Trascina l'immagine qui o clicca per caricare",
+        dropStartImageHere: "Trascina qui l'immagine iniziale o clicca per caricare",
+        dropEndImageHere: "Trascina qui l'immagine finale o clicca per caricare",
         dropVideoHere: "Trascina il video qui o clicca per caricare",
         videoFormats: "mp4, webm, mov (max 50MB)",
         

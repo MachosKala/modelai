@@ -1,12 +1,10 @@
 from fastapi import APIRouter, UploadFile, File, Form, HTTPException
-from datetime import datetime
 
 from ..models import (
     VideoGenerationRequest, 
     VideoGenerationResponse, 
     JobStatusResponse,
-    MotionType,
-    AspectRatio,
+    VideoAspectRatio,
     JobStatus
 )
 from ..services.video_generator import video_generator
@@ -17,19 +15,18 @@ router = APIRouter(prefix="/video", tags=["Video Generation"])
 
 @router.post("/generate", response_model=VideoGenerationResponse)
 async def generate_video(
-    image: UploadFile = File(..., description="Source face image"),
-    motion_type: MotionType = Form(MotionType.NATURAL),
-    duration_seconds: int = Form(5, ge=2, le=10),
-    motion_prompt: str = Form(None, description="Custom motion description"),
-    aspect_ratio: AspectRatio = Form(AspectRatio.PORTRAIT)
+    image: UploadFile = File(..., description="Start image"),
+    end_image: UploadFile | None = File(default=None, description="Optional end image"),
+    prompt: str = Form("", description="Optional prompt"),
+    aspect_ratio: VideoAspectRatio = Form(VideoAspectRatio.LANDSCAPE)
 ):
     """
-    Generate a video from a face image using Kling 2.6 Motion Control.
+    Generate a video from an image using the configured Replicate video model.
     
-    - **image**: The face image to animate
-    - **motion_type**: Type of motion (natural, dynamic, subtle, talking)
-    - **duration_seconds**: Video duration (2-10 seconds)
-    - **motion_prompt**: Optional custom motion description
+    - **image**: Start image
+    - **end_image**: Optional end image
+    - **prompt**: Prompt
+    - **aspect_ratio**: 16:9 or 9:16
     """
     
     # Validate file
@@ -45,24 +42,31 @@ async def generate_video(
     
     if not image_data:
         raise HTTPException(status_code=400, detail="Empty image file")
+
+    end_image_data: bytes | None = None
+    if end_image and end_image.filename:
+        end_content_type = end_image.content_type or ""
+        if not end_content_type.startswith("image/"):
+            raise HTTPException(status_code=400, detail="End image must be an image")
+        end_image_data = await end_image.read()
+        if not end_image_data:
+            end_image_data = None
     
     # Create request
     request = VideoGenerationRequest(
-        motion_type=motion_type,
-        duration_seconds=duration_seconds,
-        motion_prompt=motion_prompt,
+        prompt=prompt or "",
         aspect_ratio=aspect_ratio
     )
     
     # Start generation
-    job = await video_generator.generate_video(request, image_data)
+    job = await video_generator.generate_video(request, image_data, end_image_data=end_image_data)
     
     return VideoGenerationResponse(
         job_id=job.id,
         status=job.status,
         message=job.message,
         created_at=job.created_at,
-        duration_seconds=duration_seconds
+        provider=job.metadata.get("provider") if job.metadata else None
     )
 
 
@@ -105,7 +109,7 @@ async def get_video_history(limit: int = 20):
                 "message": j.message,
                 "created_at": j.created_at,
                 "result_url": j.result_url,
-                "duration": j.metadata.get("duration_seconds")
+                "aspect_ratio": j.metadata.get("aspect_ratio") if j.metadata else None
             }
             for j in jobs[:limit]
         ]

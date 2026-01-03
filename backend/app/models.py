@@ -42,18 +42,14 @@ class FaceGenerationResponse(BaseModel):
 
 # ================== Video Generation ==================
 
-class MotionType(str, Enum):
-    NATURAL = "natural"
-    DYNAMIC = "dynamic"
-    SUBTLE = "subtle"
-    TALKING = "talking"
+class VideoAspectRatio(str, Enum):
+    LANDSCAPE = "16:9"
+    PORTRAIT = "9:16"
 
 
 class VideoGenerationRequest(BaseModel):
-    motion_type: MotionType = MotionType.NATURAL
-    duration_seconds: int = Field(default=5, ge=2, le=10)
-    motion_prompt: Optional[str] = Field(None, description="Optional motion description")
-    aspect_ratio: AspectRatio = AspectRatio.PORTRAIT
+    prompt: str = Field(default="", description="Prompt for the video generation")
+    aspect_ratio: VideoAspectRatio = VideoAspectRatio.LANDSCAPE
 
 
 class VideoGenerationResponse(BaseModel):
@@ -62,7 +58,7 @@ class VideoGenerationResponse(BaseModel):
     message: str
     created_at: datetime
     result_url: Optional[str] = None
-    duration_seconds: Optional[int] = None
+    provider: Optional[str] = None
 
 
 # ================== Lip Sync ==================
