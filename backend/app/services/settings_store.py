@@ -34,3 +34,19 @@ def get_replicate_token() -> str:
     return token
 
 
+def get_face_model() -> str:
+    # Prefer env/config; fallback to saved settings from dashboard
+    if settings.face_model:
+        return settings.face_model
+    stored = load_app_settings()
+    return (stored.get("faceModel") or "").strip()
+
+
+def get_video_model() -> str:
+    # Prefer env/config; fallback to saved settings from dashboard
+    if settings.video_model:
+        return settings.video_model
+    stored = load_app_settings()
+    return (stored.get("videoModel") or "").strip()
+
+

@@ -464,6 +464,19 @@
                             <input type="url" id="api-base-url" placeholder="http://localhost:8000/api">
                             <p class="input-hint" data-i18n="backendApiUrlHint">Example: http://localhost:8000/api</p>
                         </div>
+
+                        <details class="api-help">
+                            <summary data-i18n="advancedModels">Advanced: models</summary>
+                            <div class="form-group" style="margin-top: 12px;">
+                                <label for="face-model">Face model (Replicate slug)</label>
+                                <input type="text" id="face-model" placeholder="owner/name or owner/name:version">
+                                <p class="input-hint">Example: stability-ai/sdxl or owner/model:version</p>
+                            </div>
+                            <div class="form-group">
+                                <label for="video-model">Video model (Replicate slug)</label>
+                                <input type="text" id="video-model" placeholder="owner/name or owner/name:version">
+                            </div>
+                        </details>
                         
                         <div class="api-features">
                             <div class="feature-badge">

@@ -8,7 +8,10 @@ router = APIRouter(prefix="/settings", tags=["Settings"])
 
 class SettingsPayload(BaseModel):
     # Frontend dashboard fields
+    apiBaseUrl: str | None = None
     replicateKey: str | None = None
+    faceModel: str | None = None
+    videoModel: str | None = None
     lipsyncProvider: str | None = None
     elevenLabsKey: str | None = None
     syncLabsKey: str | None = None
@@ -29,6 +32,8 @@ async def get_settings():
 
     return {
         "replicateKey": _mask(data.get("replicateKey")),
+        "faceModel": data.get("faceModel"),
+        "videoModel": data.get("videoModel"),
         "lipsyncProvider": data.get("lipsyncProvider"),
         "elevenLabsKey": _mask(data.get("elevenLabsKey")),
         "syncLabsKey": _mask(data.get("syncLabsKey")),

@@ -8,8 +8,8 @@ from typing import List
 from ..config import settings
 from ..models import Job, JobStatus, FaceGenerationRequest
 from .job_manager import job_manager
-from .replicate_client import ReplicateClient, extract_first_output_url
-from .settings_store import get_replicate_token
+from .replicate_client import ReplicateClient, ReplicateHTTPError, extract_first_output_url
+from .settings_store import get_face_model, get_replicate_token
 
 logger = logging.getLogger(__name__)
 
@@ -18,7 +18,6 @@ class ReplicateFaceService:
     """Face generation via Replicate REST API (Nano Banana Pro)."""
     
     def __init__(self):
-        self.model = settings.face_model
         self.timeout_s = settings.job_timeout_seconds
         self.poll_interval_s = settings.polling_interval_seconds
     
@@ -62,6 +61,12 @@ class ReplicateFaceService:
             )
             
             client = ReplicateClient(api_token=get_replicate_token())
+            model_id = get_face_model() or settings.face_model
+            if not model_id:
+                raise ReplicateHTTPError(
+                    "Face model is not configured. Set FACE_MODEL on the backend (Render env vars) "
+                    "or set it from the Settings dashboard."
+                )
             
             await job_manager.update_job(
                 job_id,
@@ -89,7 +94,7 @@ class ReplicateFaceService:
             )
             
             # Start prediction
-            prediction = await client.create_prediction(model=self.model, input=input_params)
+            prediction = await client.create_prediction(model=model_id, input=input_params)
             provider_job_id = prediction.get("id")
             if not provider_job_id:
                 raise Exception(f"Replicate did not return a prediction id. Response: {prediction}")
@@ -138,6 +143,14 @@ class ReplicateFaceService:
                 error_msg = final_pred.get("error") or "No output URL received from Replicate"
                 raise Exception(error_msg)
                     
+        except ReplicateHTTPError as e:
+            logger.error(f"Face generation failed for job {job_id}: {e}")
+            await job_manager.update_job(
+                job_id,
+                status=JobStatus.FAILED,
+                message="Face generation failed",
+                error=str(e),
+            )
         except Exception as e:
             logger.error(f"Face generation failed for job {job_id}: {e}")
             await job_manager.update_job(

@@ -7,8 +7,8 @@ from pathlib import Path
 from ..config import settings
 from ..models import Job, JobStatus, VideoGenerationRequest
 from .job_manager import job_manager
-from .replicate_client import ReplicateClient, extract_first_output_url
-from .settings_store import get_replicate_token
+from .replicate_client import ReplicateClient, ReplicateHTTPError, extract_first_output_url
+from .settings_store import get_replicate_token, get_video_model
 
 logger = logging.getLogger(__name__)
 
@@ -17,7 +17,6 @@ class ReplicateVideoService:
     """Video generation via Replicate REST API (Kling v2.6 Motion Control)."""
     
     def __init__(self):
-        self.model = settings.video_model
         self.timeout_s = settings.job_timeout_seconds
         self.poll_interval_s = settings.polling_interval_seconds
     
@@ -62,6 +61,12 @@ class ReplicateVideoService:
             )
 
             client = ReplicateClient(api_token=get_replicate_token())
+            model_id = get_video_model() or settings.video_model
+            if not model_id:
+                raise ReplicateHTTPError(
+                    "Video model is not configured. Set VIDEO_MODEL on the backend (Render env vars) "
+                    "or set it from the Settings dashboard."
+                )
             
             # Motion presets
             motion_presets = {
@@ -89,7 +94,7 @@ class ReplicateVideoService:
             await job_manager.update_job(job_id, progress=40, message="Generating video...")
 
             prediction = await client.create_prediction(
-                model=self.model,
+                model=model_id,
                 input={
                     "image": image_uri,
                     "prompt": motion_prompt,
@@ -142,6 +147,14 @@ class ReplicateVideoService:
                 result_url=local_url
             )
                     
+        except ReplicateHTTPError as e:
+            logger.error(f"Video generation failed for job {job_id}: {e}")
+            await job_manager.update_job(
+                job_id,
+                status=JobStatus.FAILED,
+                message="Video generation failed",
+                error=str(e),
+            )
         except Exception as e:
             logger.error(f"Video generation failed for job {job_id}: {e}")
             await job_manager.update_job(

@@ -74,9 +74,12 @@ class ReplicateClient:
                 headers=self._headers(),
             )
             if model_resp.status_code >= 400:
-                raise ReplicateHTTPError(
-                    f"Replicate model lookup failed: {model_resp.status_code} {model_resp.text}"
-                )
+                if model_resp.status_code == 404:
+                    raise ReplicateHTTPError(
+                        f"Replicate model not found: {owner}/{name}. "
+                        f"Use a valid Replicate model slug (owner/name) or pin a version (owner/name:version)."
+                    )
+                raise ReplicateHTTPError(f"Replicate model lookup failed: {model_resp.status_code} {model_resp.text}")
 
             model_data = model_resp.json()
             latest = model_data.get("latest_version") or {}

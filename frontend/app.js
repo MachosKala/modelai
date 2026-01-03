@@ -277,6 +277,12 @@ function loadSettings() {
 
             const replicateInput = document.getElementById('replicate-key');
             if (replicateInput) replicateInput.value = settings.replicateKey || '';
+
+            const faceModelInput = document.getElementById('face-model');
+            if (faceModelInput) faceModelInput.value = settings.faceModel || '';
+
+            const videoModelInput = document.getElementById('video-model');
+            if (videoModelInput) videoModelInput.value = settings.videoModel || '';
             
             const elevenLabsInput = document.getElementById('elevenlabs-key');
             if (elevenLabsInput) elevenLabsInput.value = settings.elevenLabsKey || '';
@@ -305,6 +311,8 @@ function loadSettings() {
 function saveSettings() {
     const apiBaseInput = document.getElementById('api-base-url');
     const replicateInput = document.getElementById('replicate-key');
+    const faceModelInput = document.getElementById('face-model');
+    const videoModelInput = document.getElementById('video-model');
     const elevenLabsInput = document.getElementById('elevenlabs-key');
     const syncLabsInput = document.getElementById('synclabs-key');
     const didInput = document.getElementById('did-key');
@@ -312,6 +320,8 @@ function saveSettings() {
     state.settings = {
         apiBaseUrl: apiBaseInput ? apiBaseInput.value : '',
         replicateKey: replicateInput ? replicateInput.value : '',
+        faceModel: faceModelInput ? faceModelInput.value : '',
+        videoModel: videoModelInput ? videoModelInput.value : '',
         lipsyncProvider: document.querySelector('.provider-tab.active')?.dataset.provider || 'elevenlabs',
         elevenLabsKey: elevenLabsInput ? elevenLabsInput.value : '',
         syncLabsKey: syncLabsInput ? syncLabsInput.value : '',
