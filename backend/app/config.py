@@ -43,7 +43,8 @@ class Settings(BaseSettings):
     max_file_size_mb: int = 50
     
     # Job Configuration
-    job_timeout_seconds: int = 300
+    # Replicate jobs can take several minutes depending on queue/load.
+    job_timeout_seconds: int = 900
     polling_interval_seconds: int = 5
     max_retries: int = 3
     
