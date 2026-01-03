@@ -49,8 +49,7 @@ async def generate_face(
         job_id=job.id,
         status=job.status,
         message=job.message,
-        created_at=job.created_at,
-        cost_credits=50
+        created_at=job.created_at
     )
 
 

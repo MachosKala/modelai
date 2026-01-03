@@ -65,8 +65,7 @@ async def generate_lipsync(
         job_id=job.id,
         status=job.status,
         message=job.message,
-        created_at=job.created_at,
-        cost_credits=75
+        created_at=job.created_at
     )
 
 

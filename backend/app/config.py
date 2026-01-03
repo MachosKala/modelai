@@ -8,10 +8,10 @@ class Settings(BaseSettings):
     replicate_api_token: str = ""
     
     # Face Generation Model (on Replicate)
-    face_model: str = "nanobanana/nano-banana-pro"  # or alternative
+    face_model: str = "nanobanana/nano-banana-pro"
     
     # Video Generation Model (on Replicate)  
-    video_model: str = "klingai/kling-v2.6-motion"  # or alternative
+    video_model: str = "klingai/kling-v2.6-motion-control"
     
     # Lip Sync Provider
     lipsync_provider: Literal["elevenlabs", "sync_labs", "d-id"] = "elevenlabs"

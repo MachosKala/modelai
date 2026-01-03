@@ -2,8 +2,34 @@
  * AI Model Generator - Frontend Application
  */
 
-const API_BASE = 'http://localhost:8000/api';
+let API_BASE = 'http://localhost:8000/api';
 const POLLING_INTERVAL = 2000;
+
+function computeDefaultApiBase() {
+    const host = window.location.hostname;
+    const isLocal = host === 'localhost' || host === '127.0.0.1';
+    if (isLocal) return 'http://localhost:8000/api';
+    // If you deploy a backend on the same domain with a rewrite, this will work:
+    return `${window.location.origin}/api`;
+}
+
+function setApiBase(url) {
+    const value = (url || '').trim();
+    if (!value) {
+        API_BASE = computeDefaultApiBase();
+        return;
+    }
+    // Normalize: remove trailing slash
+    API_BASE = value.replace(/\/$/, '');
+}
+
+function getBackendOrigin() {
+    try {
+        return new URL(API_BASE).origin;
+    } catch {
+        return 'http://localhost:8000';
+    }
+}
 
 // ============================================
 // State Management
@@ -21,6 +47,7 @@ const state = {
         lipsync: null
     },
     settings: {
+        apiBaseUrl: '',
         replicateKey: '',
         lipsyncProvider: 'elevenlabs',
         elevenLabsKey: '',
@@ -188,6 +215,7 @@ function switchCategory(category) {
 function initSettings() {
     // Load saved settings
     loadSettings();
+    setApiBase(state.settings.apiBaseUrl || '');
     
     // Provider tabs
     document.querySelectorAll('.provider-tab').forEach(tab => {
@@ -244,6 +272,9 @@ function loadSettings() {
             state.settings = { ...state.settings, ...settings };
             
             // Populate form fields
+            const apiBaseInput = document.getElementById('api-base-url');
+            if (apiBaseInput) apiBaseInput.value = settings.apiBaseUrl || '';
+
             const replicateInput = document.getElementById('replicate-key');
             if (replicateInput) replicateInput.value = settings.replicateKey || '';
             
@@ -272,12 +303,14 @@ function loadSettings() {
 }
 
 function saveSettings() {
+    const apiBaseInput = document.getElementById('api-base-url');
     const replicateInput = document.getElementById('replicate-key');
     const elevenLabsInput = document.getElementById('elevenlabs-key');
     const syncLabsInput = document.getElementById('synclabs-key');
     const didInput = document.getElementById('did-key');
     
     state.settings = {
+        apiBaseUrl: apiBaseInput ? apiBaseInput.value : '',
         replicateKey: replicateInput ? replicateInput.value : '',
         lipsyncProvider: document.querySelector('.provider-tab.active')?.dataset.provider || 'elevenlabs',
         elevenLabsKey: elevenLabsInput ? elevenLabsInput.value : '',
@@ -286,6 +319,7 @@ function saveSettings() {
     };
     
     localStorage.setItem('apiSettings', JSON.stringify(state.settings));
+    setApiBase(state.settings.apiBaseUrl || '');
     
     // Send to backend
     sendSettingsToBackend();
@@ -293,7 +327,7 @@ function saveSettings() {
 
 async function sendSettingsToBackend() {
     try {
-        await fetch(`${API_BASE.replace('/api', '')}/settings`, {
+        await fetch(`${API_BASE}/settings`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(state.settings)
@@ -671,7 +705,7 @@ function startJobPolling(jobId, jobType) {
 function showResult(job) {
     elements.resultDisplay.hidden = false;
     
-    const resultUrl = `http://localhost:8000${job.result_url}`;
+    const resultUrl = `${getBackendOrigin()}${job.result_url}`;
     
     if (job.job_type === 'face') {
         elements.resultImage.src = resultUrl;
@@ -710,7 +744,7 @@ function addToHistory(job) {
         emptyMsg.remove();
     }
     
-    const resultUrl = `http://localhost:8000${job.result_url}`;
+    const resultUrl = `${getBackendOrigin()}${job.result_url}`;
     const isVideo = job.job_type !== 'face';
     
     const item = document.createElement('div');

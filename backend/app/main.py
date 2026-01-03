@@ -7,7 +7,7 @@ from fastapi.responses import JSONResponse
 from contextlib import asynccontextmanager
 
 from .config import settings
-from .routes import face, video, lipsync
+from .routes import face, video, lipsync, settings as settings_routes
 from .services.job_manager import job_manager
 
 # Configure logging
@@ -65,6 +65,7 @@ app.mount("/storage", StaticFiles(directory=str(storage_path)), name="storage")
 app.include_router(face.router, prefix="/api")
 app.include_router(video.router, prefix="/api")
 app.include_router(lipsync.router, prefix="/api")
+app.include_router(settings_routes.router, prefix="/api")
 
 
 # ================== Health & Status Endpoints ==================

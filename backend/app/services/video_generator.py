@@ -1,30 +1,25 @@
-import replicate
 import asyncio
 import logging
 import base64
 import httpx
-import os
 from pathlib import Path
-from typing import Optional
-from datetime import datetime
 
 from ..config import settings
 from ..models import Job, JobStatus, VideoGenerationRequest
 from .job_manager import job_manager
+from .replicate_client import ReplicateClient, extract_first_output_url
+from .settings_store import get_replicate_token
 
 logger = logging.getLogger(__name__)
 
 
 class ReplicateVideoService:
-    """Service for video generation using Replicate API with Kling v2.6 Motion Control"""
+    """Video generation via Replicate REST API (Kling v2.6 Motion Control)."""
     
     def __init__(self):
-        self.api_token = settings.replicate_api_token
-        # Kling v2.6 Motion Control model
-        self.model = "klingai/kling-v2.6-motion-control"
-        # Fallback model
-        self.fallback_model = "stability-ai/stable-video-diffusion:3f0457e4619daac51203dedb472816fd4af51f3149fa7a9e0b5ffcf1b8172438"
-        self.timeout = settings.job_timeout_seconds
+        self.model = settings.video_model
+        self.timeout_s = settings.job_timeout_seconds
+        self.poll_interval_s = settings.polling_interval_seconds
     
     async def generate_video(
         self,
@@ -57,7 +52,7 @@ class ReplicateVideoService:
         request: VideoGenerationRequest,
         source_image: bytes
     ):
-        """Process video generation in background using Replicate"""
+        """Process video generation in background using Replicate REST API."""
         try:
             await job_manager.update_job(
                 job_id,
@@ -65,9 +60,8 @@ class ReplicateVideoService:
                 progress=10,
                 message="Preparing video request..."
             )
-            
-            # Set API token
-            os.environ["REPLICATE_API_TOKEN"] = self.api_token
+
+            client = ReplicateClient(api_token=get_replicate_token())
             
             # Motion presets
             motion_presets = {
@@ -89,66 +83,45 @@ class ReplicateVideoService:
             await job_manager.update_job(
                 job_id,
                 progress=25,
-                message="Sending to Replicate for video generation..."
+                message="Sending to Kling v2.6..."
             )
             
-            video_url = None
-            
-            # Try Kling v2.6 Motion Control first
-            try:
-                await job_manager.update_job(
-                    job_id,
-                    progress=40,
-                    message="Generating video with Kling v2.6..."
-                )
-                
-                output = await asyncio.to_thread(
-                    replicate.run,
-                    self.model,
-                    input={
-                        "image": image_uri,
-                        "prompt": motion_prompt,
-                        "duration": request.duration_seconds,
-                        "aspect_ratio": request.aspect_ratio.value
-                    }
-                )
-                
-                if output:
-                    video_url = output if isinstance(output, str) else output[0] if isinstance(output, list) else None
-                    
-            except Exception as e:
-                logger.warning(f"Kling failed, trying fallback: {e}")
-                
-                # Fallback: Stable Video Diffusion
-                try:
-                    await job_manager.update_job(
+            await job_manager.update_job(job_id, progress=40, message="Generating video...")
+
+            prediction = await client.create_prediction(
+                model=self.model,
+                input={
+                    "image": image_uri,
+                    "prompt": motion_prompt,
+                    "duration": request.duration_seconds,
+                    "aspect_ratio": request.aspect_ratio.value,
+                },
+            )
+            provider_job_id = prediction.get("id")
+            await job_manager.update_job(job_id, provider_job_id=provider_job_id, progress=55, message="Queued...")
+
+            def _tick(pred: dict, elapsed_s: int):
+                status = (pred.get("status") or "").lower()
+                progress = min(55 + int(elapsed_s / max(self.poll_interval_s, 1)) * 3, 95)
+                asyncio.create_task(
+                    job_manager.update_job(
                         job_id,
-                        progress=50,
-                        message="Using alternative model..."
+                        progress=progress,
+                        message=f"{status}... ({elapsed_s}s)",
                     )
-                    
-                    output = await asyncio.to_thread(
-                        replicate.run,
-                        self.fallback_model,
-                        input={
-                            "input_image": image_uri,
-                            "motion_bucket_id": 127 if request.motion_type.value == "dynamic" else 80,
-                            "fps": 7,
-                            "cond_aug": 0.02,
-                            "decoding_t": 7,
-                            "video_length": "14_frames_with_svd" if request.duration_seconds <= 3 else "25_frames_with_svd_xt"
-                        }
-                    )
-                    
-                    if output:
-                        video_url = output if isinstance(output, str) else output[0] if isinstance(output, list) else None
-                        
-                except Exception as e2:
-                    logger.error(f"Fallback also failed: {e2}")
-                    raise Exception(f"Video generation failed: {e2}")
-            
+                )
+
+            final_pred = await client.wait_for_prediction(
+                provider_job_id,
+                timeout_s=self.timeout_s,
+                poll_interval_s=self.poll_interval_s,
+                on_tick=_tick,
+            )
+
+            video_url = extract_first_output_url(final_pred.get("output"))
             if not video_url:
-                raise Exception("No video URL received from Replicate")
+                error_msg = final_pred.get("error") or "No video URL received from Replicate"
+                raise Exception(error_msg)
             
             await job_manager.update_job(
                 job_id,

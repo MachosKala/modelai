@@ -62,8 +62,7 @@ async def generate_video(
         status=job.status,
         message=job.message,
         created_at=job.created_at,
-        duration_seconds=duration_seconds,
-        cost_credits=100
+        duration_seconds=duration_seconds
     )
 
 

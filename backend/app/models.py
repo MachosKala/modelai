@@ -38,7 +38,6 @@ class FaceGenerationResponse(BaseModel):
     message: str
     created_at: datetime
     result_url: Optional[str] = None
-    cost_credits: int = 50
 
 
 # ================== Video Generation ==================
@@ -64,7 +63,6 @@ class VideoGenerationResponse(BaseModel):
     created_at: datetime
     result_url: Optional[str] = None
     duration_seconds: Optional[int] = None
-    cost_credits: int = 100
 
 
 # ================== Lip Sync ==================
@@ -90,7 +88,6 @@ class LipSyncResponse(BaseModel):
     created_at: datetime
     result_url: Optional[str] = None
     audio_url: Optional[str] = None
-    cost_credits: int = 75
 
 
 # ================== Job Status ==================

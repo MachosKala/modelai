@@ -1351,6 +1351,12 @@ input[type="range"]::-webkit-slider-thumb:hover {
     margin-bottom: var(--space-lg);
 }
 
+.input-hint {
+    margin-top: 6px;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
 .replicate-section {
     background: linear-gradient(135deg, var(--bg-card) 0%, rgba(99, 102, 241, 0.05) 100%);
     border-color: var(--accent-primary);

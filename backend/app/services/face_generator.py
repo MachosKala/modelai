@@ -1,28 +1,26 @@
-import replicate
 import asyncio
 import logging
 import base64
 import httpx
-import os
 from pathlib import Path
-from typing import Optional, List
-from datetime import datetime
+from typing import List
 
 from ..config import settings
 from ..models import Job, JobStatus, FaceGenerationRequest
 from .job_manager import job_manager
+from .replicate_client import ReplicateClient, extract_first_output_url
+from .settings_store import get_replicate_token
 
 logger = logging.getLogger(__name__)
 
 
 class ReplicateFaceService:
-    """Service for face generation using Replicate API with Nano Banana Pro"""
+    """Face generation via Replicate REST API (Nano Banana Pro)."""
     
     def __init__(self):
-        self.api_token = settings.replicate_api_token
-        # Nano Banana Pro model on Replicate
-        self.model = "nanobanana/nano-banana-pro"
-        self.timeout = settings.job_timeout_seconds
+        self.model = settings.face_model
+        self.timeout_s = settings.job_timeout_seconds
+        self.poll_interval_s = settings.polling_interval_seconds
     
     async def generate_face(
         self,
@@ -54,35 +52,16 @@ class ReplicateFaceService:
         request: FaceGenerationRequest,
         reference_images: List[bytes] = None
     ):
-        """Process face generation in background using Replicate"""
+        """Process face generation in background using Replicate REST API."""
         try:
             await job_manager.update_job(
                 job_id,
                 status=JobStatus.PROCESSING,
                 progress=10,
-                message="Preparing request for Replicate..."
+                message="Preparing request..."
             )
             
-            # Set API token
-            os.environ["REPLICATE_API_TOKEN"] = self.api_token
-            
-            # Determine aspect ratio dimensions
-            aspect_ratios = {
-                "auto": (1024, 1024),
-                "1:1": (1024, 1024),
-                "16:9": (1344, 768),
-                "9:16": (768, 1344),
-                "4:3": (1024, 768),
-                "3:4": (768, 1024),
-                "9:21": (576, 1344),
-                "21:9": (1344, 576),
-                "2:3": (768, 1152),
-                "3:2": (1152, 768)
-            }
-            width, height = aspect_ratios.get(request.aspect_ratio.value, (1024, 1024))
-            
-            # Use Nano Banana Pro model
-            model_id = self.model
+            client = ReplicateClient(api_token=get_replicate_token())
             
             await job_manager.update_job(
                 job_id,
@@ -90,11 +69,9 @@ class ReplicateFaceService:
                 message="Sending to Nano Banana Pro..."
             )
             
-            # Prepare input for Replicate
+            # Prepare minimal input payload (model schemas differ; keep it lean)
             input_params = {
                 "prompt": request.prompt,
-                "width": width,
-                "height": height,
             }
             
             # Add reference image if provided (for img2img)
@@ -102,9 +79,8 @@ class ReplicateFaceService:
                 # Convert first image to data URI
                 img_base64 = base64.b64encode(reference_images[0]).decode("utf-8")
                 input_params["image"] = f"data:image/png;base64,{img_base64}"
-            
-            # Add negative prompt for better quality
-            input_params["negative_prompt"] = "blurry, low quality, distorted, deformed, ugly, bad anatomy"
+            if request.aspect_ratio.value != "auto":
+                input_params["aspect_ratio"] = request.aspect_ratio.value
             
             await job_manager.update_job(
                 job_id,
@@ -112,38 +88,38 @@ class ReplicateFaceService:
                 message="Generating face with AI..."
             )
             
-            # Run the model on Replicate
-            try:
-                output = await asyncio.to_thread(
-                    replicate.run,
-                    model_id,
-                    input=input_params
+            # Start prediction
+            prediction = await client.create_prediction(model=self.model, input=input_params)
+            provider_job_id = prediction.get("id")
+            await job_manager.update_job(job_id, provider_job_id=provider_job_id, progress=60, message="Queued...")
+
+            # Poll to completion
+            def _tick(pred: dict, elapsed_s: int):
+                status = (pred.get("status") or "").lower()
+                progress = min(60 + int(elapsed_s / max(self.poll_interval_s, 1)) * 3, 95)
+                asyncio.create_task(
+                    job_manager.update_job(
+                        job_id,
+                        progress=progress,
+                        message=f"{status}... ({elapsed_s}s)",
+                    )
                 )
-            except replicate.exceptions.ModelError as e:
-                # Try fallback model if primary fails
-                logger.warning(f"Primary model failed, trying fallback: {e}")
-                output = await asyncio.to_thread(
-                    replicate.run,
-                    "stability-ai/sdxl:39ed52f2a78e934b3ba6e2a89f5b1c712de7dfea535525255b1aa35c5565e08b",
-                    input={
-                        "prompt": request.prompt,
-                        "width": width,
-                        "height": height,
-                        "negative_prompt": "blurry, low quality, distorted"
-                    }
-                )
+
+            final_pred = await client.wait_for_prediction(
+                provider_job_id,
+                timeout_s=self.timeout_s,
+                poll_interval_s=self.poll_interval_s,
+                on_tick=_tick,
+            )
             
             await job_manager.update_job(
                 job_id,
                 progress=80,
                 message="Downloading result..."
             )
-            
-            # Get the output URL
-            if isinstance(output, list):
-                result_url = output[0] if output else None
-            else:
-                result_url = output
+
+            output = final_pred.get("output")
+            result_url = extract_first_output_url(output)
             
             if result_url:
                 # Download and save locally
@@ -157,7 +133,8 @@ class ReplicateFaceService:
                     result_url=local_url
                 )
             else:
-                raise Exception("No result URL received from Replicate")
+                error_msg = final_pred.get("error") or "No output URL received from Replicate"
+                raise Exception(error_msg)
                     
         except Exception as e:
             logger.error(f"Face generation failed for job {job_id}: {e}")
