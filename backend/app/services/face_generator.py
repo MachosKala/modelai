@@ -91,6 +91,8 @@ class ReplicateFaceService:
             # Start prediction
             prediction = await client.create_prediction(model=self.model, input=input_params)
             provider_job_id = prediction.get("id")
+            if not provider_job_id:
+                raise Exception(f"Replicate did not return a prediction id. Response: {prediction}")
             await job_manager.update_job(job_id, provider_job_id=provider_job_id, progress=60, message="Queued...")
 
             # Poll to completion

@@ -98,6 +98,8 @@ class ReplicateVideoService:
                 },
             )
             provider_job_id = prediction.get("id")
+            if not provider_job_id:
+                raise Exception(f"Replicate did not return a prediction id. Response: {prediction}")
             await job_manager.update_job(job_id, provider_job_id=provider_job_id, progress=55, message="Queued...")
 
             def _tick(pred: dict, elapsed_s: int):
