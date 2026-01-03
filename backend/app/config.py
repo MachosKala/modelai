@@ -8,10 +8,13 @@ class Settings(BaseSettings):
     replicate_api_token: str = ""
     
     # Face Generation Model (on Replicate)
-    face_model: str = "nanobanana/nano-banana-pro"
+    # Recommended default (official Replicate model)
+    face_model: str = "google/nano-banana-pro:eefce837d77048ccc736cd660d4f178d223b2d99aeb5ef856741eb81941c9ed2"
     
     # Video Generation Model (on Replicate)  
-    video_model: str = "klingai/kling-v2.6-motion-control"
+    # NOTE: Set this from the dashboard or Render env vars to a valid Replicate video model.
+    # Kling v2.6 Motion Control may not be available on Replicate for your account.
+    video_model: str = ""
     
     # Lip Sync Provider
     lipsync_provider: Literal["elevenlabs", "sync_labs", "d-id"] = "elevenlabs"

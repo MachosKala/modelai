@@ -74,18 +74,28 @@ class ReplicateFaceService:
                 message="Sending to Nano Banana Pro..."
             )
             
-            # Prepare minimal input payload (model schemas differ; keep it lean)
-            input_params = {
-                "prompt": request.prompt,
-            }
-            
-            # Add reference image if provided (for img2img)
-            if reference_images and len(reference_images) > 0:
-                # Convert first image to data URI
-                img_base64 = base64.b64encode(reference_images[0]).decode("utf-8")
-                input_params["image"] = f"data:image/png;base64,{img_base64}"
-            if request.aspect_ratio.value != "auto":
+            # Prepare input payload for google/nano-banana-pro
+            # Schema (from Replicate model): prompt, image_input[], aspect_ratio, resolution, output_format, safety_filter_level
+            input_params = {"prompt": request.prompt}
+
+            if reference_images:
+                image_uris = []
+                for img in reference_images[:14]:
+                    img_base64 = base64.b64encode(img).decode("utf-8")
+                    image_uris.append(f"data:image/png;base64,{img_base64}")
+                if image_uris:
+                    input_params["image_input"] = image_uris
+
+            if request.aspect_ratio.value and request.aspect_ratio.value != "auto":
                 input_params["aspect_ratio"] = request.aspect_ratio.value
+            else:
+                # Let the model match the input image by default
+                input_params["aspect_ratio"] = "match_input_image"
+
+            # Keep defaults simple
+            input_params["resolution"] = "2K"
+            input_params["output_format"] = "jpg"
+            input_params["safety_filter_level"] = "block_only_high"
             
             await job_manager.update_job(
                 job_id,

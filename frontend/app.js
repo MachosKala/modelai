@@ -260,7 +260,12 @@ function initSettings() {
     elements.settingsForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         saveSettings();
-        showToast(t('settingsSaved'), 'success');
+        const ok = await sendSettingsToBackend();
+        if (ok) {
+            showToast(t('settingsSaved'), 'success');
+        } else {
+            showToast('Failed to reach backend. Check Backend API URL.', 'error');
+        }
     });
 }
 
@@ -330,20 +335,19 @@ function saveSettings() {
     
     localStorage.setItem('apiSettings', JSON.stringify(state.settings));
     setApiBase(state.settings.apiBaseUrl || '');
-    
-    // Send to backend
-    sendSettingsToBackend();
 }
 
 async function sendSettingsToBackend() {
     try {
-        await fetch(`${API_BASE}/settings`, {
+        const res = await fetch(`${API_BASE}/settings`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(state.settings)
         });
+        return res.ok;
     } catch (e) {
         console.log('Settings saved locally (backend not available)');
+        return false;
     }
 }
 

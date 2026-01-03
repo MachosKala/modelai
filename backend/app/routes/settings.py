@@ -1,7 +1,13 @@
 from fastapi import APIRouter
 from pydantic import BaseModel
 
-from ..services.settings_store import load_app_settings, save_app_settings
+from ..services.settings_store import (
+    get_face_model,
+    get_replicate_token,
+    get_video_model,
+    load_app_settings,
+    save_app_settings,
+)
 
 router = APIRouter(prefix="/settings", tags=["Settings"])
 
@@ -38,6 +44,11 @@ async def get_settings():
         "elevenLabsKey": _mask(data.get("elevenLabsKey")),
         "syncLabsKey": _mask(data.get("syncLabsKey")),
         "didKey": _mask(data.get("didKey")),
+        "effective": {
+            "replicateTokenConfigured": bool(get_replicate_token()),
+            "faceModel": get_face_model(),
+            "videoModel": get_video_model(),
+        },
     }
 
 
@@ -48,6 +59,6 @@ async def save_settings(payload: SettingsPayload):
     update = payload.model_dump(exclude_none=True)
     current.update(update)
     save_app_settings(current)
-    return {"ok": True}
+    return {"ok": True, "saved": sorted(update.keys())}
 
 
