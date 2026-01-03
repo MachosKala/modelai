@@ -1345,6 +1345,40 @@ input[type="range"]::-webkit-slider-thumb:hover {
     color: var(--accent-primary);
 }
 
+.section-desc {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-bottom: var(--space-lg);
+}
+
+.replicate-section {
+    background: linear-gradient(135deg, var(--bg-card) 0%, rgba(99, 102, 241, 0.05) 100%);
+    border-color: var(--accent-primary);
+}
+
+.api-features {
+    display: flex;
+    gap: var(--space-sm);
+    margin-top: var(--space-md);
+}
+
+.feature-badge {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: var(--space-xs) var(--space-sm);
+    background: var(--bg-tertiary);
+    border-radius: var(--radius-full);
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+}
+
+.feature-badge svg {
+    width: 14px;
+    height: 14px;
+    color: var(--accent-primary);
+}
+
 /* Input with visibility toggle */
 .input-with-help {
     position: relative;

@@ -100,6 +100,9 @@ const translations = {
         // Settings
         apiSettings: "API Settings",
         apiSettingsDesc: "Configure your API keys to enable AI generation features",
+        replicateSection: "Replicate API",
+        replicateKey: "Replicate API Token",
+        replicateDesc: "Used for Face Generation (Nano Banana Pro) and Video Generation (Kling v2.6)",
         faceGeneration: "Face Generation",
         nanoBananaKey: "Nano Banana Pro API Key",
         nanoBananaUrl: "Nano Banana Base URL",
@@ -234,6 +237,9 @@ const translations = {
         // Settings
         apiSettings: "Impostazioni API",
         apiSettingsDesc: "Configura le tue chiavi API per abilitare le funzionalità di generazione AI",
+        replicateSection: "API Replicate",
+        replicateKey: "Token API Replicate",
+        replicateDesc: "Usato per Generazione Volti (Nano Banana Pro) e Video (Kling v2.6)",
         faceGeneration: "Generazione Volti",
         nanoBananaKey: "Chiave API Nano Banana Pro",
         nanoBananaUrl: "URL Base Nano Banana",

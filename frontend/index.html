@@ -488,21 +488,23 @@
                 </div>
 
                 <form id="settings-form" class="settings-form">
-                    <!-- Face Generation API -->
-                    <div class="settings-section">
+                    <!-- Replicate API (Face & Video) -->
+                    <div class="settings-section replicate-section">
                         <h3 class="section-title">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <rect x="3" y="3" width="18" height="18" rx="2"/>
-                                <circle cx="8.5" cy="8.5" r="1.5"/>
-                                <path d="M21 15l-5-5L5 21"/>
+                                <polygon points="12 2 2 7 12 12 22 7 12 2"/>
+                                <polyline points="2 17 12 22 22 17"/>
+                                <polyline points="2 12 12 17 22 12"/>
                             </svg>
-                            <span data-i18n="faceGeneration">Face Generation</span>
+                            <span data-i18n="replicateSection">Replicate API</span>
                         </h3>
                         
+                        <p class="section-desc" data-i18n="replicateDesc">Used for Face Generation (Nano Banana Pro) and Video Generation (Kling v2.6)</p>
+                        
                         <div class="form-group">
-                            <label for="nano-banana-key" data-i18n="nanoBananaKey">Nano Banana Pro API Key</label>
+                            <label for="replicate-key" data-i18n="replicateKey">Replicate API Token</label>
                             <div class="input-with-help">
-                                <input type="password" id="nano-banana-key" placeholder="nb_xxxxxxxxxxxxxxxx" autocomplete="off">
+                                <input type="password" id="replicate-key" placeholder="r8_xxxxxxxxxxxxxxxx" autocomplete="off">
                                 <button type="button" class="toggle-visibility" title="Show/Hide">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                         <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
@@ -512,52 +514,29 @@
                             </div>
                             <details class="api-help">
                                 <summary data-i18n="howToGetKeys">How to get API keys</summary>
-                                <p data-i18n="nanoBananaInstructions">1. Go to nanobanana.com
-2. Create an account
-3. Navigate to API section
-4. Generate your API key</p>
+                                <p>1. Go to replicate.com
+2. Sign up with GitHub
+3. Go to Account → API Tokens
+4. Create and copy your token</p>
                             </details>
                         </div>
-
-                        <div class="form-group">
-                            <label for="nano-banana-url" data-i18n="nanoBananaUrl">Nano Banana Base URL</label>
-                            <input type="url" id="nano-banana-url" value="https://api.nanobanana.com/v1" placeholder="https://api.nanobanana.com/v1">
-                        </div>
-                    </div>
-
-                    <!-- Video Generation API -->
-                    <div class="settings-section">
-                        <h3 class="section-title">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <polygon points="23 7 16 12 23 17 23 7"/>
-                                <rect x="1" y="5" width="15" height="14" rx="2"/>
-                            </svg>
-                            <span data-i18n="videoGeneration">Video Generation</span>
-                        </h3>
                         
-                        <div class="form-group">
-                            <label for="kling-key" data-i18n="klingKey">Kling API Key</label>
-                            <div class="input-with-help">
-                                <input type="password" id="kling-key" placeholder="kling_xxxxxxxxxxxxxxxx" autocomplete="off">
-                                <button type="button" class="toggle-visibility" title="Show/Hide">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                                        <circle cx="12" cy="12" r="3"/>
-                                    </svg>
-                                </button>
+                        <div class="api-features">
+                            <div class="feature-badge">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="3" y="3" width="18" height="18" rx="2"/>
+                                    <circle cx="8.5" cy="8.5" r="1.5"/>
+                                    <path d="M21 15l-5-5L5 21"/>
+                                </svg>
+                                <span>Face Generation</span>
                             </div>
-                            <details class="api-help">
-                                <summary data-i18n="howToGetKeys">How to get API keys</summary>
-                                <p data-i18n="klingInstructions">1. Visit kling.ai
-2. Sign up for an account
-3. Go to Developer settings
-4. Create a new API key</p>
-                            </details>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="kling-url" data-i18n="klingUrl">Kling Base URL</label>
-                            <input type="url" id="kling-url" value="https://api.kling.ai/v1" placeholder="https://api.kling.ai/v1">
+                            <div class="feature-badge">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polygon points="23 7 16 12 23 17 23 7"/>
+                                    <rect x="1" y="5" width="15" height="14" rx="2"/>
+                                </svg>
+                                <span>Video Generation</span>
+                            </div>
                         </div>
                     </div>
 

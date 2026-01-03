@@ -21,10 +21,7 @@ const state = {
         lipsync: null
     },
     settings: {
-        nanoBananaKey: '',
-        nanoBananaUrl: 'https://api.nanobanana.com/v1',
-        klingKey: '',
-        klingUrl: 'https://api.kling.ai/v1',
+        replicateKey: '',
         lipsyncProvider: 'elevenlabs',
         elevenLabsKey: '',
         syncLabsKey: '',
@@ -247,13 +244,17 @@ function loadSettings() {
             state.settings = { ...state.settings, ...settings };
             
             // Populate form fields
-            document.getElementById('nano-banana-key').value = settings.nanoBananaKey || '';
-            document.getElementById('nano-banana-url').value = settings.nanoBananaUrl || 'https://api.nanobanana.com/v1';
-            document.getElementById('kling-key').value = settings.klingKey || '';
-            document.getElementById('kling-url').value = settings.klingUrl || 'https://api.kling.ai/v1';
-            document.getElementById('elevenlabs-key').value = settings.elevenLabsKey || '';
-            document.getElementById('synclabs-key').value = settings.syncLabsKey || '';
-            document.getElementById('did-key').value = settings.didKey || '';
+            const replicateInput = document.getElementById('replicate-key');
+            if (replicateInput) replicateInput.value = settings.replicateKey || '';
+            
+            const elevenLabsInput = document.getElementById('elevenlabs-key');
+            if (elevenLabsInput) elevenLabsInput.value = settings.elevenLabsKey || '';
+            
+            const syncLabsInput = document.getElementById('synclabs-key');
+            if (syncLabsInput) syncLabsInput.value = settings.syncLabsKey || '';
+            
+            const didInput = document.getElementById('did-key');
+            if (didInput) didInput.value = settings.didKey || '';
             
             // Set active provider tab
             if (settings.lipsyncProvider) {
@@ -271,15 +272,17 @@ function loadSettings() {
 }
 
 function saveSettings() {
+    const replicateInput = document.getElementById('replicate-key');
+    const elevenLabsInput = document.getElementById('elevenlabs-key');
+    const syncLabsInput = document.getElementById('synclabs-key');
+    const didInput = document.getElementById('did-key');
+    
     state.settings = {
-        nanoBananaKey: document.getElementById('nano-banana-key').value,
-        nanoBananaUrl: document.getElementById('nano-banana-url').value,
-        klingKey: document.getElementById('kling-key').value,
-        klingUrl: document.getElementById('kling-url').value,
+        replicateKey: replicateInput ? replicateInput.value : '',
         lipsyncProvider: document.querySelector('.provider-tab.active')?.dataset.provider || 'elevenlabs',
-        elevenLabsKey: document.getElementById('elevenlabs-key').value,
-        syncLabsKey: document.getElementById('synclabs-key').value,
-        didKey: document.getElementById('did-key').value
+        elevenLabsKey: elevenLabsInput ? elevenLabsInput.value : '',
+        syncLabsKey: syncLabsInput ? syncLabsInput.value : '',
+        didKey: didInput ? didInput.value : ''
     };
     
     localStorage.setItem('apiSettings', JSON.stringify(state.settings));

@@ -4,13 +4,14 @@ import os
 
 
 class Settings(BaseSettings):
-    # Nano Banana Pro (Face Generation)
-    nano_banana_api_key: str = ""
-    nano_banana_base_url: str = "https://api.nanobanana.com/v1"
+    # Replicate API (for Face & Video generation)
+    replicate_api_token: str = ""
     
-    # Kling 2.6 (Video Generation)
-    kling_api_key: str = ""
-    kling_base_url: str = "https://api.kling.ai/v1"
+    # Face Generation Model (on Replicate)
+    face_model: str = "nanobanana/nano-banana-pro"  # or alternative
+    
+    # Video Generation Model (on Replicate)  
+    video_model: str = "klingai/kling-v2.6-motion"  # or alternative
     
     # Lip Sync Provider
     lipsync_provider: Literal["elevenlabs", "sync_labs", "d-id"] = "elevenlabs"
@@ -54,4 +55,3 @@ os.makedirs(f"{settings.storage_path}/faces", exist_ok=True)
 os.makedirs(f"{settings.storage_path}/videos", exist_ok=True)
 os.makedirs(f"{settings.storage_path}/lipsync", exist_ok=True)
 os.makedirs(f"{settings.storage_path}/uploads", exist_ok=True)
-
