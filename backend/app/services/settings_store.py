@@ -35,18 +35,25 @@ def get_replicate_token() -> str:
 
 
 def get_face_model() -> str:
-    # Prefer env/config; fallback to saved settings from dashboard
-    if settings.face_model:
-        return settings.face_model
+    """
+    Prefer dashboard override (stored settings), then fallback to env/config.
+    This makes it easy to fix wrong model slugs without redeploying.
+    """
     stored = load_app_settings()
-    return (stored.get("faceModel") or "").strip()
+    value = (stored.get("faceModel") or "").strip()
+    if value:
+        return value
+    return settings.face_model.strip() if settings.face_model else ""
 
 
 def get_video_model() -> str:
-    # Prefer env/config; fallback to saved settings from dashboard
-    if settings.video_model:
-        return settings.video_model
+    """
+    Prefer dashboard override (stored settings), then fallback to env/config.
+    """
     stored = load_app_settings()
-    return (stored.get("videoModel") or "").strip()
+    value = (stored.get("videoModel") or "").strip()
+    if value:
+        return value
+    return settings.video_model.strip() if settings.video_model else ""
 
 
