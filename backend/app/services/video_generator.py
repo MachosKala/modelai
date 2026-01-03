@@ -113,10 +113,21 @@ class ReplicateVideoService:
             
             await job_manager.update_job(job_id, progress=40, message="Generating video...")
 
+            # Prompt: always include an instruction to "mount" the character image onto the driving video.
+            user_prompt = (request.prompt or "").strip()
+            base_prompt = (
+                "Replace the character/person in the driving video with the subject from the reference image. "
+                "Preserve the driving video's motion, timing, facial expressions, camera movement, framing, "
+                "background, lighting, and overall style. Keep the subject's identity consistent with the "
+                "reference image (face, hair, skin tone) and make the result hyper-realistic with natural "
+                "blinks and stable facial features. No warping, no flicker, no text, no watermark."
+            )
+            final_prompt = f"{base_prompt}\n\nAdditional instructions: {user_prompt}" if user_prompt else base_prompt
+
             input_payload: dict = {
                 "image": image_uri,
                 "video": video_uri,
-                "prompt": request.prompt or "",
+                "prompt": final_prompt,
                 "mode": request.mode.value,
                 "character_orientation": request.character_orientation.value,
                 "keep_original_sound": request.keep_original_sound,

@@ -54,7 +54,11 @@ class ReplicateClient:
 
         Endpoint: POST /v1/files (multipart/form-data)
         """
-        files = {"file": (filename or "upload.bin", content, content_type or "application/octet-stream")}
+        # Replicate Files API expects multipart field name "content" (not "file").
+        # See: https://api.replicate.com/openapi.json -> POST /files
+        files = {
+            "content": (filename or "upload.bin", content, content_type or "application/octet-stream"),
+        }
         async with httpx.AsyncClient(timeout=120.0) as client:
             resp = await client.post(
                 f"{self.base_url}/files",
