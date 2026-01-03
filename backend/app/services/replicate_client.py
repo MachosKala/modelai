@@ -34,16 +34,64 @@ class ReplicateClient:
         }
 
     async def create_prediction(self, *, model: str, input: dict[str, Any]) -> dict[str, Any]:
-        payload: dict[str, Any] = {"model": model, "input": input}
+        """
+        Create a prediction.
+
+        Supports:
+        - model slug: "owner/name"
+        - model slug pinned to version: "owner/name:version_id_or_hash"
+
+        Replicate's HTTP API supports multiple ways to create predictions depending on the endpoint.
+        We try the most convenient method first and fall back when needed.
+        """
+
+        owner, name, version = _parse_model_identifier(model)
+
         async with httpx.AsyncClient(timeout=60.0) as client:
+            # If model includes an explicit version, use /predictions with version.
+            if version:
+                resp = await client.post(
+                    f"{self.base_url}/predictions",
+                    headers=self._headers(),
+                    json={"version": version, "input": input},
+                )
+                if resp.status_code >= 400:
+                    raise ReplicateHTTPError(f"Replicate create_prediction failed: {resp.status_code} {resp.text}")
+                return resp.json()
+
+            # Prefer "run by model" endpoint (no need to resolve version)
             resp = await client.post(
+                f"{self.base_url}/models/{owner}/{name}/predictions",
+                headers=self._headers(),
+                json={"input": input},
+            )
+            if resp.status_code < 400:
+                return resp.json()
+
+            # Fallback: resolve latest version then call /predictions
+            model_resp = await client.get(
+                f"{self.base_url}/models/{owner}/{name}",
+                headers=self._headers(),
+            )
+            if model_resp.status_code >= 400:
+                raise ReplicateHTTPError(
+                    f"Replicate model lookup failed: {model_resp.status_code} {model_resp.text}"
+                )
+
+            model_data = model_resp.json()
+            latest = model_data.get("latest_version") or {}
+            version_id = latest.get("id") or latest.get("version") or latest.get("uuid")
+            if not version_id:
+                raise ReplicateHTTPError("Replicate model lookup succeeded but no latest_version.id found.")
+
+            resp2 = await client.post(
                 f"{self.base_url}/predictions",
                 headers=self._headers(),
-                json=payload,
+                json={"version": version_id, "input": input},
             )
-        if resp.status_code >= 400:
-            raise ReplicateHTTPError(f"Replicate create_prediction failed: {resp.status_code} {resp.text}")
-        return resp.json()
+            if resp2.status_code >= 400:
+                raise ReplicateHTTPError(f"Replicate create_prediction failed: {resp2.status_code} {resp2.text}")
+            return resp2.json()
 
     async def get_prediction(self, prediction_id: str) -> dict[str, Any]:
         async with httpx.AsyncClient(timeout=60.0) as client:
@@ -110,5 +158,26 @@ def extract_first_output_url(output: Any) -> Optional[str]:
         return output.get("url") or output.get("video") or output.get("image")
 
     return None
+
+
+def _parse_model_identifier(model: str) -> tuple[str, str, Optional[str]]:
+    raw = (model or "").strip()
+    if not raw:
+        raise ReplicateHTTPError("Empty model identifier.")
+
+    base, version = (raw.split(":", 1) + [None])[:2]
+    if "/" not in base:
+        raise ReplicateHTTPError(
+            f"Invalid model identifier '{raw}'. Expected 'owner/name' or 'owner/name:version'."
+        )
+    owner, name = base.split("/", 1)
+    owner = owner.strip()
+    name = name.strip()
+    if not owner or not name:
+        raise ReplicateHTTPError(
+            f"Invalid model identifier '{raw}'. Expected 'owner/name' or 'owner/name:version'."
+        )
+    version = version.strip() if isinstance(version, str) and version.strip() else None
+    return owner, name, version
 
 
