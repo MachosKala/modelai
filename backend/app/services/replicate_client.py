@@ -97,9 +97,33 @@ class ReplicateClient:
                     headers=self._headers(),
                     json={"version": version, "input": input},
                 )
-                if resp.status_code >= 400:
+                if resp.status_code < 400:
+                    return resp.json()
+
+                # Some models have hidden/rolling versions or require using the model slug instead of a version ID.
+                # If we get a 422, try a couple of fallbacks before giving up.
+                if resp.status_code == 422:
+                    # Fallback 1: send the full "owner/name:version" string as version.
+                    resp2 = await client.post(
+                        f"{self.base_url}/predictions",
+                        headers=self._headers(),
+                        json={"version": f"{owner}/{name}:{version}", "input": input},
+                    )
+                    if resp2.status_code < 400:
+                        return resp2.json()
+
+                    # Fallback 2: treat as official model endpoint (no version).
+                    resp3 = await client.post(
+                        f"{self.base_url}/models/{owner}/{name}/predictions",
+                        headers=self._headers(),
+                        json={"input": input},
+                    )
+                    if resp3.status_code < 400:
+                        return resp3.json()
+
                     raise ReplicateHTTPError(f"Replicate create_prediction failed: {resp.status_code} {resp.text}")
-                return resp.json()
+
+                raise ReplicateHTTPError(f"Replicate create_prediction failed: {resp.status_code} {resp.text}")
 
             # Prefer "run by model" endpoint (no need to resolve version)
             resp = await client.post(

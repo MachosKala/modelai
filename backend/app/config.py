@@ -13,7 +13,10 @@ class Settings(BaseSettings):
     
     # Video Generation Model (on Replicate)  
     # Default: Kling v2.6 Motion Control (image + driving video -> video)
-    video_model: str = "kwaivgi/kling-v2.6-motion-control:0539a841b08214a281bf6792ad847469700bc0d2935e6eba2cf3d0e8944815c0"
+    #
+    # Use the MODEL SLUG (no pinned version) to avoid "Invalid version" errors for models that
+    # have hidden/rolling versions or gated version IDs.
+    video_model: str = "kwaivgi/kling-v2.6-motion-control"
     
     # Lip Sync Provider
     lipsync_provider: Literal["elevenlabs", "sync_labs", "d-id"] = "elevenlabs"
