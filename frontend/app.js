@@ -560,6 +560,10 @@ async function submitVideoGeneration() {
         
         const formData = new FormData();
         formData.append('image', state.uploadedFiles.video);
+        const mode = document.getElementById('video-mode')?.value || '';
+        if (mode) {
+            formData.append('mode', mode);
+        }
         if (state.uploadedFiles.videoEnd) {
             formData.append('end_image', state.uploadedFiles.videoEnd);
         }

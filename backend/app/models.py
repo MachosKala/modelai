@@ -48,6 +48,7 @@ class VideoAspectRatio(str, Enum):
 
 
 class VideoGenerationRequest(BaseModel):
+    mode: Optional[str] = Field(default=None, description="Optional model mode (model-specific)")
     prompt: str = Field(default="", description="Prompt for the video generation")
     aspect_ratio: VideoAspectRatio = VideoAspectRatio.LANDSCAPE
 

@@ -227,6 +227,16 @@
 
                 <form id="video-form" class="generation-form">
                     <div class="form-group">
+                        <label data-i18n="selectMode">Select Mode</label>
+                        <div class="select-wrapper">
+                            <select name="mode" id="video-mode">
+                                <option value="" selected>Auto</option>
+                                <option value="Veo3.1 image to video fast">Veo3.1 image to video fast</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
                         <label><span data-i18n="startImage">Start Image</span> <span class="required">*</span></label>
                         <div class="single-upload">
                             <input type="file" accept="image/*" id="video-source" hidden required>

@@ -17,6 +17,7 @@ router = APIRouter(prefix="/video", tags=["Video Generation"])
 async def generate_video(
     image: UploadFile = File(..., description="Start image"),
     end_image: UploadFile | None = File(default=None, description="Optional end image"),
+    mode: str = Form("", description="Optional mode (model-specific)"),
     prompt: str = Form("", description="Optional prompt"),
     aspect_ratio: VideoAspectRatio = Form(VideoAspectRatio.LANDSCAPE)
 ):
@@ -54,6 +55,7 @@ async def generate_video(
     
     # Create request
     request = VideoGenerationRequest(
+        mode=mode.strip() or None,
         prompt=prompt or "",
         aspect_ratio=aspect_ratio
     )

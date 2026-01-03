@@ -33,6 +33,7 @@ class ReplicateVideoService:
             status=JobStatus.PENDING,
             message="Initializing video generation...",
             metadata={
+                "mode": request.mode,
                 "prompt": request.prompt,
                 "aspect_ratio": request.aspect_ratio.value,
                 "has_end_image": bool(end_image_data),
@@ -92,6 +93,8 @@ class ReplicateVideoService:
                 "prompt": request.prompt or "",
                 "aspect_ratio": request.aspect_ratio.value,
             }
+            if request.mode:
+                input_payload["mode"] = request.mode
             if end_image_uri:
                 input_payload["end_image"] = end_image_uri
 
