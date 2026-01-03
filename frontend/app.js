@@ -440,15 +440,6 @@ function initForms() {
         await submitLipsyncGeneration();
     });
     
-    // Strength slider
-    const strengthSlider = document.getElementById('face-strength');
-    const strengthValue = strengthSlider.parentElement.querySelector('.slider-value');
-    
-    strengthSlider.addEventListener('input', () => {
-        const value = (strengthSlider.value / 100).toFixed(1);
-        strengthValue.textContent = value;
-    });
-    
     // Character count
     const lipsyncText = document.getElementById('lipsync-text');
     const charCount = document.getElementById('char-count');
@@ -475,9 +466,7 @@ async function submitFaceGeneration() {
         
         const formData = new FormData();
         formData.append('prompt', document.getElementById('face-prompt').value);
-        formData.append('mode', document.getElementById('face-mode').value);
         formData.append('aspect_ratio', document.getElementById('face-aspect').value);
-        formData.append('strength', document.getElementById('face-strength').value / 100);
         
         // Add reference images
         state.uploadedFiles.face.forEach((file, index) => {

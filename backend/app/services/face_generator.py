@@ -20,12 +20,8 @@ class ReplicateFaceService:
     
     def __init__(self):
         self.api_token = settings.replicate_api_token
-        # Available face generation models on Replicate
-        self.models = {
-            "nano-banana": "nanobanana/nano-banana-pro",
-            "realistic": "lucataco/sdxl-lightning-4step:fast",
-            "artistic": "stability-ai/sdxl:latest"
-        }
+        # Nano Banana Pro model on Replicate
+        self.model = "nanobanana/nano-banana-pro"
         self.timeout = settings.job_timeout_seconds
     
     async def generate_face(
@@ -42,9 +38,7 @@ class ReplicateFaceService:
             message="Initializing face generation...",
             metadata={
                 "prompt": request.prompt,
-                "aspect_ratio": request.aspect_ratio.value,
-                "mode": request.mode,
-                "strength": request.strength
+                "aspect_ratio": request.aspect_ratio.value
             }
         )
         await job_manager.create_job(job)
@@ -76,19 +70,24 @@ class ReplicateFaceService:
             aspect_ratios = {
                 "auto": (1024, 1024),
                 "1:1": (1024, 1024),
-                "9:16": (768, 1344),
                 "16:9": (1344, 768),
-                "21:9": (1536, 640)
+                "9:16": (768, 1344),
+                "4:3": (1024, 768),
+                "3:4": (768, 1024),
+                "9:21": (576, 1344),
+                "21:9": (1344, 576),
+                "2:3": (768, 1152),
+                "3:2": (1152, 768)
             }
             width, height = aspect_ratios.get(request.aspect_ratio.value, (1024, 1024))
             
-            # Get model based on mode
-            model_id = self.models.get(request.mode, self.models["nano-banana"])
+            # Use Nano Banana Pro model
+            model_id = self.model
             
             await job_manager.update_job(
                 job_id,
                 progress=30,
-                message=f"Sending to Replicate ({request.mode})..."
+                message="Sending to Nano Banana Pro..."
             )
             
             # Prepare input for Replicate
@@ -103,7 +102,6 @@ class ReplicateFaceService:
                 # Convert first image to data URI
                 img_base64 = base64.b64encode(reference_images[0]).decode("utf-8")
                 input_params["image"] = f"data:image/png;base64,{img_base64}"
-                input_params["strength"] = request.strength
             
             # Add negative prompt for better quality
             input_params["negative_prompt"] = "blurry, low quality, distorted, deformed, ugly, bad anatomy"

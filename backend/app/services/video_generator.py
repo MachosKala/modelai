@@ -20,14 +20,10 @@ class ReplicateVideoService:
     
     def __init__(self):
         self.api_token = settings.replicate_api_token
-        # Available video generation models on Replicate
-        self.models = {
-            "kling": "klingai/kling-v2-master",  # Kling model if available
-            "svd": "stability-ai/stable-video-diffusion:3f0457e4619daac51203dedb472816fd4af51f3149fa7a9e0b5ffcf1b8172438",
-            "animate": "lucataco/animate-diff:beecf59c4aee8d81bf04f0381033dfa10dc16e845b4ae00d281e2fa377e48571",
-            "minimax": "minimax/video-01",
-            "wan": "wan-video/wan-2.1"
-        }
+        # Kling v2.6 Motion Control model
+        self.model = "klingai/kling-v2.6-motion-control"
+        # Fallback model
+        self.fallback_model = "stability-ai/stable-video-diffusion:3f0457e4619daac51203dedb472816fd4af51f3149fa7a9e0b5ffcf1b8172438"
         self.timeout = settings.job_timeout_seconds
     
     async def generate_video(
@@ -96,28 +92,24 @@ class ReplicateVideoService:
                 message="Sending to Replicate for video generation..."
             )
             
-            # Try Kling model first, then fallback to Stable Video Diffusion
             video_url = None
             
-            # Primary: Try Stable Video Diffusion (most reliable)
+            # Try Kling v2.6 Motion Control first
             try:
                 await job_manager.update_job(
                     job_id,
                     progress=40,
-                    message="Generating video with AI..."
+                    message="Generating video with Kling v2.6..."
                 )
                 
-                # Use Stable Video Diffusion
                 output = await asyncio.to_thread(
                     replicate.run,
-                    self.models["svd"],
+                    self.model,
                     input={
-                        "input_image": image_uri,
-                        "motion_bucket_id": 127 if request.motion_type.value == "dynamic" else 80,
-                        "fps": 7,
-                        "cond_aug": 0.02,
-                        "decoding_t": 7,
-                        "video_length": "14_frames_with_svd" if request.duration_seconds <= 3 else "25_frames_with_svd_xt"
+                        "image": image_uri,
+                        "prompt": motion_prompt,
+                        "duration": request.duration_seconds,
+                        "aspect_ratio": request.aspect_ratio.value
                     }
                 )
                 
@@ -125,19 +117,26 @@ class ReplicateVideoService:
                     video_url = output if isinstance(output, str) else output[0] if isinstance(output, list) else None
                     
             except Exception as e:
-                logger.warning(f"SVD failed, trying AnimateDiff: {e}")
+                logger.warning(f"Kling failed, trying fallback: {e}")
                 
-                # Fallback: AnimateDiff
+                # Fallback: Stable Video Diffusion
                 try:
+                    await job_manager.update_job(
+                        job_id,
+                        progress=50,
+                        message="Using alternative model..."
+                    )
+                    
                     output = await asyncio.to_thread(
                         replicate.run,
-                        self.models["animate"],
+                        self.fallback_model,
                         input={
-                            "image": image_uri,
-                            "prompt": motion_prompt,
-                            "n_prompt": "blurry, distorted, low quality",
-                            "steps": 25,
-                            "guidance_scale": 7.5
+                            "input_image": image_uri,
+                            "motion_bucket_id": 127 if request.motion_type.value == "dynamic" else 80,
+                            "fps": 7,
+                            "cond_aug": 0.02,
+                            "decoding_t": 7,
+                            "video_length": "14_frames_with_svd" if request.duration_seconds <= 3 else "25_frames_with_svd_xt"
                         }
                     )
                     
@@ -145,7 +144,7 @@ class ReplicateVideoService:
                         video_url = output if isinstance(output, str) else output[0] if isinstance(output, list) else None
                         
                 except Exception as e2:
-                    logger.error(f"AnimateDiff also failed: {e2}")
+                    logger.error(f"Fallback also failed: {e2}")
                     raise Exception(f"Video generation failed: {e2}")
             
             if not video_url:

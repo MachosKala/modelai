@@ -19,8 +19,6 @@ router = APIRouter(prefix="/face", tags=["Face Generation"])
 async def generate_face(
     prompt: str = Form(..., description="Description of the face to generate"),
     aspect_ratio: AspectRatio = Form(AspectRatio.AUTO),
-    mode: str = Form("nano-banana"),
-    strength: float = Form(0.7, ge=0.0, le=1.0),
     images: List[UploadFile] = File(default=[], description="Optional reference images (max 4)")
 ):
     """
@@ -28,7 +26,6 @@ async def generate_face(
     
     - **prompt**: Describe the face characteristics (e.g., "young woman with green eyes, freckles")
     - **images**: Optional reference images to guide the generation
-    - **strength**: How much to transform from reference (0.0-1.0)
     """
     
     # Read reference images
@@ -42,9 +39,7 @@ async def generate_face(
     # Create request
     request = FaceGenerationRequest(
         prompt=prompt,
-        aspect_ratio=aspect_ratio,
-        mode=mode,
-        strength=strength
+        aspect_ratio=aspect_ratio
     )
     
     # Start generation

@@ -15,9 +15,14 @@ class JobStatus(str, Enum):
 class AspectRatio(str, Enum):
     AUTO = "auto"
     SQUARE = "1:1"
-    PORTRAIT = "9:16"
     LANDSCAPE = "16:9"
-    WIDE = "21:9"
+    PORTRAIT = "9:16"
+    RATIO_4_3 = "4:3"
+    RATIO_3_4 = "3:4"
+    RATIO_9_21 = "9:21"
+    RATIO_21_9 = "21:9"
+    RATIO_2_3 = "2:3"
+    RATIO_3_2 = "3:2"
 
 
 # ================== Face Generation ==================
@@ -25,8 +30,6 @@ class AspectRatio(str, Enum):
 class FaceGenerationRequest(BaseModel):
     prompt: str = Field(..., description="Description of the face to generate")
     aspect_ratio: AspectRatio = AspectRatio.AUTO
-    mode: str = Field(default="nano-banana", description="Generation mode")
-    strength: float = Field(default=0.7, ge=0.0, le=1.0, description="Transformation strength")
 
 
 class FaceGenerationResponse(BaseModel):

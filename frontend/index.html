@@ -103,16 +103,6 @@
                 </div>
             </div>
 
-            <div class="sidebar-footer">
-                <div class="credits-badge">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="12" r="10"/>
-                        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
-                        <line x1="12" y1="17" x2="12.01" y2="17"/>
-                    </svg>
-                    <span>500 <span data-i18n="credits">credits</span></span>
-                </div>
-            </div>
         </aside>
 
         <!-- Main Content -->
@@ -125,16 +115,6 @@
                 </div>
 
                 <form id="face-form" class="generation-form">
-                    <div class="form-group">
-                        <label data-i18n="selectMode">Select Mode</label>
-                        <div class="select-wrapper">
-                            <select name="mode" id="face-mode">
-                                <option value="nano-banana">Nano-Banana</option>
-                                <option value="realistic">Ultra Realistic</option>
-                                <option value="artistic">Artistic</option>
-                            </select>
-                        </div>
-                    </div>
 
                     <div class="form-group">
                         <label><span data-i18n="referenceImages">Reference Images</span> <span class="optional">(<span data-i18n="optional">optional</span>)</span></label>
@@ -209,45 +189,22 @@
                         ></textarea>
                     </div>
 
-                    <div class="form-row">
-                        <div class="form-group half">
-                            <label data-i18n="aspectRatio">Aspect Ratio</label>
-                            <div class="select-wrapper">
-                                <select name="aspect_ratio" id="face-aspect">
-                                    <option value="auto" data-i18n="auto">Auto</option>
-                                    <option value="1:1" data-i18n="square">Square (1:1)</option>
-                                    <option value="9:16" data-i18n="portrait">Portrait (9:16)</option>
-                                    <option value="16:9" data-i18n="landscape">Landscape (16:9)</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="form-group half">
-                            <label data-i18n="strength">Strength</label>
-                            <div class="slider-container">
-                                <input type="range" id="face-strength" name="strength" min="0" max="100" value="70">
-                                <span class="slider-value">0.7</span>
-                            </div>
-                        </div>
-                    </div>
-
                     <div class="form-group">
-                        <div class="toggle-group">
-                            <label class="toggle">
-                                <input type="checkbox" id="face-unlimited" disabled>
-                                <span class="toggle-slider"></span>
-                                <span class="toggle-label" data-i18n="unlimitedMode">Unlimited Mode</span>
-                            </label>
-                            <span class="toggle-note" data-i18n="unlimitedNote">Only available for Standard members and above</span>
+                        <label data-i18n="aspectRatio">Aspect Ratio</label>
+                        <div class="select-wrapper">
+                            <select name="aspect_ratio" id="face-aspect">
+                                <option value="auto">Auto</option>
+                                <option value="1:1">1:1</option>
+                                <option value="16:9">16:9</option>
+                                <option value="9:16">9:16</option>
+                                <option value="4:3">4:3</option>
+                                <option value="3:4">3:4</option>
+                                <option value="9:21">9:21</option>
+                                <option value="21:9">21:9</option>
+                                <option value="2:3">2:3</option>
+                                <option value="3:2">3:2</option>
+                            </select>
                         </div>
-                    </div>
-
-                    <div class="cost-indicator">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <circle cx="12" cy="12" r="10"/>
-                            <line x1="12" y1="8" x2="12" y2="12"/>
-                            <line x1="12" y1="16" x2="12.01" y2="16"/>
-                        </svg>
-                        <span><span data-i18n="cost">Cost</span>: <strong>50 <span data-i18n="credits">credits</span></strong></span>
                     </div>
 
                     <button type="submit" class="generate-btn">
@@ -350,10 +307,10 @@
                             <label data-i18n="duration">Duration</label>
                             <div class="select-wrapper">
                                 <select name="duration_seconds" id="video-duration">
-                                    <option value="3">3 <span data-i18n="seconds">seconds</span></option>
-                                    <option value="5" selected>5 <span data-i18n="seconds">seconds</span></option>
-                                    <option value="7">7 <span data-i18n="seconds">seconds</span></option>
-                                    <option value="10">10 <span data-i18n="seconds">seconds</span></option>
+                                    <option value="3">3 sec</option>
+                                    <option value="5" selected>5 sec</option>
+                                    <option value="7">7 sec</option>
+                                    <option value="10">10 sec</option>
                                 </select>
                             </div>
                         </div>
@@ -361,21 +318,11 @@
                             <label data-i18n="aspectRatio">Aspect Ratio</label>
                             <div class="select-wrapper">
                                 <select name="aspect_ratio" id="video-aspect">
-                                    <option value="9:16" selected data-i18n="portrait">Portrait (9:16)</option>
-                                    <option value="1:1" data-i18n="square">Square (1:1)</option>
-                                    <option value="16:9" data-i18n="landscape">Landscape (16:9)</option>
+                                    <option value="9:16" selected>9:16</option>
+                                    <option value="16:9">16:9</option>
                                 </select>
                             </div>
                         </div>
-                    </div>
-
-                    <div class="cost-indicator">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <circle cx="12" cy="12" r="10"/>
-                            <line x1="12" y1="8" x2="12" y2="12"/>
-                            <line x1="12" y1="16" x2="12.01" y2="16"/>
-                        </svg>
-                        <span><span data-i18n="cost">Cost</span>: <strong>100 <span data-i18n="credits">credits</span></strong></span>
                     </div>
 
                     <button type="submit" class="generate-btn">
@@ -458,15 +405,6 @@
                                 </select>
                             </div>
                         </div>
-                    </div>
-
-                    <div class="cost-indicator">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <circle cx="12" cy="12" r="10"/>
-                            <line x1="12" y1="8" x2="12" y2="12"/>
-                            <line x1="12" y1="16" x2="12.01" y2="16"/>
-                        </svg>
-                        <span><span data-i18n="cost">Cost</span>: <strong>75 <span data-i18n="credits">credits</span></strong></span>
                     </div>
 
                     <button type="submit" class="generate-btn">
